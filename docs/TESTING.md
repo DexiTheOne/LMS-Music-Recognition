@@ -96,6 +96,9 @@ UI inspection is manual; automated tests must not navigate the browser.
 Client-specific acceptance criteria:
 
 - Jive remains on the current menu; it must not open an empty result page.
+- Jive replaces the **Recognize Song** row arrow with its inline wheel while
+  the request is pending, removes the wheel on every terminal path, and shows
+  the terminal popup only through Jive.
 - Material remains on the current page and shows its three-dot loader while
   recognition is pending.
 - The Material entry must be visible and clickable.
@@ -135,13 +138,13 @@ Expected shape:
 }
 ```
 
-Named Material modes must carry `origin=material` in fixed parameters. Numeric
-`menu=1`, used by both Material and Jive, must carry `origin=auto`; the direct
-command resolves JSON-RPC as Material and Comet as Jive. Its request remains
-pending until recognition completes, which is what keeps Material's native
-three-dot loader visible. The terminal response must contain one text row with
-the result, and the control action must use `parentNoRefresh`. Do not add a
-custom type or item style.
+Named modes may carry `origin=material` and numeric `menu=1` carries
+`origin=auto`, but the direct command's retained transport is authoritative:
+JSON-RPC is Material and SqueezePlay/Comet is Jive. Its request remains pending
+until recognition completes, which keeps each UI's native loader visible. The
+Material terminal response must contain one text row with the result, and the
+control action must use `parentNoRefresh`. Do not add a custom type or item
+style.
 
 ## Dependency checks
 

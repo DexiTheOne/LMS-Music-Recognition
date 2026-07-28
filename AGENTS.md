@@ -206,15 +206,15 @@ Jive and Material Skin:
   completes JSON-RPC as soon as the dispatch handler returns.
 - Do not send a **Listening** popup. Leave the callback pending so LMS's native
   block animation is visible on SB2 and Material's native loader remains
-  visible. Jive does not provide a generic inline spinner for ordinary pending
-  menu actions; its `processingPopup` metadata is limited to input/search
-  actions.
+  visible. SqueezePlay/Jive replaces the selected row's right arrow with its
+  native inline wheel while the direct action request remains pending.
 - The callback parameters identify traditional-button requests with
   `isButton`. Material uses both named TrackInfo modes and numeric `menu=1`;
-  Jive also uses numeric `menu=1`. Encode named modes as `origin=material` and
-  the ambiguous numeric mode as `origin=auto` in fixed action parameters. The
-  direct command resolves `auto` from its retained request source: Material
-  uses JSON-RPC and Jive uses Comet. Do not infer origin inside the later URL
+  Jive can also use named modes or numeric `menu=1`. Encode named modes as
+  `origin=material` and the ambiguous numeric mode as `origin=auto` in fixed
+  action parameters. The direct command treats its retained request transport
+  as authoritative: Material uses JSON-RPC and Jive uses SqueezePlay/Comet.
+  Do not infer origin inside the later URL
   callback: XMLBrowser re-fetches actions with `menu=trackinfo`, supplies no
   callback query, and TrackInfo uses a global cached feed.
 - SB2 terminal matches use a traditional `line` display with artist on the
@@ -224,6 +224,9 @@ Jive and Material Skin:
   response only on the initiating browser connection.
 - The session watchdog guarantees every accepted request eventually completes
   with a match, explicit no-match, or concise error.
+- A separate direct-UI watchdog runs five seconds beyond the session deadline
+  and completes/cancels a stranded manual action so Jive's inline wheel and
+  Material's loader cannot run forever if the normal callback path faults.
 - Jive popups use `$client->showBriefly` with `type => 'popupplay'`.
 - Traditional players use the same `showBriefly` call's `line` payload.
 - Material fallback popups use its supported

@@ -91,34 +91,81 @@ sub track_info_item {
 sub _recognize_command {
 	my ($request) = @_;
 	my $client = $request->client;
-	my $origin = $request->getParam('origin') || 'material';
-	if ($origin eq 'auto') {
-		$origin = ($request->source || '') eq 'JSONRPC' ? 'material' : 'jive';
-	}
-	else {
-		$origin = $origin eq 'jive' ? 'jive' : 'material';
-	}
+	my $origin = _request_origin(
+		$request, $request->getParam('origin') || 'material'
+	);
 	$log->info(
 		'UI recognize command origin=' . $origin .
 		' source=' . ($request->source || '<none>') .
 		' connection=' . ($request->connectionID || '<none>')
 	);
 	$request->setStatusProcessing();
-
-	my $started = Plugins::ShazamCapture::Plugin::start_recognition(
-		$client,
-		sub {
-			my ($result) = @_;
-			_complete_command($request, $client, $origin, $result);
-		}
+	my $guard = { completed => 0 };
+	my $ui_timeout = eval {
+		Plugins::ShazamCapture::Plugin::recognition_timeout_seconds()
+	} || 120;
+	Slim::Utils::Timers::setTimer(
+		$guard, time() + $ui_timeout + 5,
+		\&_recognize_command_timed_out, $request, $client, $origin
 	);
 
-	_complete_command($request, $client, $origin, $started)
+	my $started = eval {
+		Plugins::ShazamCapture::Plugin::start_recognition(
+			$client,
+			sub {
+				my ($result) = @_;
+				_complete_command(
+					$request, $client, $origin, $result, $guard
+				);
+			}
+		);
+	};
+	if (!$started || ref $started ne 'HASH') {
+		my $error = $@ || 'Recognition could not be started';
+		$error =~ s/\s+$//;
+		$started = {
+			ok => 0, stage => 'ui', error => $error
+		};
+	}
+
+	_complete_command($request, $client, $origin, $started, $guard)
 		unless $started->{ok};
 }
 
+sub _request_origin {
+	my ($request, $hint) = @_;
+	my $source = $request->source || '';
+
+	# The command retains the transport which actually invoked the action.
+	# That is more reliable than TrackInfo's menuMode: SqueezePlay/Jive can
+	# request a named mode which otherwise looks identical to Material.
+	return 'material' if $source eq 'JSONRPC';
+	return 'jive'
+		if $source =~ /SqueezePlay/i || $source =~ m{(?:^|/)slim/request(?:\||$)}i;
+	return 'jive' if $hint eq 'auto';
+	return $hint eq 'jive' ? 'jive' : 'material';
+}
+
+sub _recognize_command_timed_out {
+	my ($guard, $request, $client, $origin) = @_;
+	return if $guard->{completed};
+	_complete_command($request, $client, $origin, {
+		ok => 0, stage => 'ui', error => 'Recognition UI timed out'
+	}, $guard);
+	Plugins::ShazamCapture::Plugin::cancel_recognition(
+		$client->id, 'Recognition UI timed out', 'manual'
+	) if $client;
+}
+
 sub _complete_command {
-	my ($request, $client, $origin, $result) = @_;
+	my ($request, $client, $origin, $result, $guard) = @_;
+	return if $guard && $guard->{completed};
+	if ($guard) {
+		$guard->{completed} = 1;
+		Slim::Utils::Timers::killTimers(
+			$guard, \&_recognize_command_timed_out
+		);
+	}
 	my $message = _result_message($client, $result);
 
 	if ($origin eq 'material') {

@@ -1,5 +1,17 @@
 # Changelog and failure history
 
+## 2026-07-28 — Jive inline recognition progress
+
+- Fixed named SqueezePlay/Jive TrackInfo requests being misclassified as
+  Material. The retained direct-command transport is now authoritative:
+  JSON-RPC routes to Material, while SqueezePlay/Comet routes to Jive.
+- Jive's direct action remains processing so its native inline wheel replaces
+  the row arrow until completion, then only Jive receives the result popup.
+- Added a UI-request watchdog slightly beyond the recognition-session
+  deadline. It completes the pending action with an error and cancels a
+  stranded manual recognition, preventing an endless inline wheel even if the
+  normal recognition callback path faults.
+
 ## 2026-07-27 — Optional confirmation bypass after two no-matches
 
 - Added a default-off global toggle that disables consecutive confirmation for
@@ -33,9 +45,9 @@
 - Classify every named TrackInfo menu mode as Material. Material can enter the
   More menu through several named modes, so enumerating only `nowhere` and
   `track` still misrouted some launches.
-- Documented that Jive has no native generic inline spinner for an ordinary
-  pending menu callback. Its server-provided processing UI applies only to
-  input/search actions; SB2 and Material retain their native loading states.
+- Earlier testing incorrectly concluded that Jive had no native generic inline
+  spinner for an ordinary pending menu callback. SqueezePlay does show an
+  inline wheel for the lifetime of its pending direct action.
 - Removed Material **Listening** and keep-alive notifications. The native menu
   callback now remains pending, leaving Material's three-dot loader visible
   until a match, no-match, or error completes it.

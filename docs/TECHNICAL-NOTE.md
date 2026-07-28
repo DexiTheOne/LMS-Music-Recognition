@@ -37,14 +37,15 @@ one `showBriefly` / `nowPlaying` item after accepting recognition.
 | Concern | Jive | Material Skin | SB2 |
 |---|---|---|---|
 | Action | Native callback item | Native callback item | Native callback level |
-| Progress | Persistent `popupplay` | Native notification | Persistent `line` display |
-| Completion | Replacement `popupplay` | Replacement notification | Replacement `line` display |
+| Progress | Native inline wheel on the selected row | Native three-dot loader | Native block animation |
+| Completion | Jive-only `popupplay` | Scoped terminal list response | Replacement `line` display |
 | Match layout | Title, artist, album lines | `Title — Artist — Album` | Display lines |
 
 The recognition session has an overall deadline derived from its sample,
-worker, retry-delay, and retry-sample budgets. The display safety timeout is
-slightly longer. Playback cancellation also completes manual UI requests, so
-progress is always replaced by a match, no-match, or error.
+worker, retry-delay, and retry-sample budgets. The direct UI request has an
+independent deadline five seconds longer. Playback cancellation also completes
+manual UI requests, so progress is always replaced by a match, no-match, or
+error.
 
 ## Settings integration
 

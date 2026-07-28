@@ -64,10 +64,12 @@ The selected track/player **More** menu includes **Recognize Song**. It is a
 terminal action, not a submenu. LMS's native loading animation remains visible
 until the match, **No song found**, or an error is available.
 
-Jive receives its popup, Material Skin receives the result on the initiating
-browser response, and SB2 displays the artist on its small top line and title
-on its large bottom line. Results are sent only to the UI path that started
-recognition.
+Jive shows its inline wheel in place of the selected row's arrow and receives
+the terminal popup. Material Skin receives the result on the initiating browser
+response, and SB2 displays the artist on its small top line and title on its
+large bottom line. Results are sent only to the UI path that started
+recognition. A separate UI deadline prevents a native loader from remaining
+active if the normal recognition callback path faults.
 
 ## Settings
 
