@@ -36,10 +36,19 @@ one `showBriefly` / `nowPlaying` item after accepting recognition.
 
 | Concern | Jive | Material Skin | SB2 |
 |---|---|---|---|
-| Action | Native callback item | Native callback item | Native callback level |
+| Action | Direct list action | Direct list action | URL callback only; no control-UI action metadata |
 | Progress | Native inline wheel on the selected row | Native three-dot loader | Native block animation |
 | Completion | Child result window; manual Back | Scoped terminal list response | Replacement `line` display |
 | Match layout | Title, artist, album lines | `Title - Artist - Album` | Display lines |
+
+The SB2 distinction is structural, not merely a completion-time condition.
+Traditional rows must contain only the callback URL and
+`nextWindow => 'parent'`. If they also expose `jive` actions or `itemActions`,
+SB2 executes `shazamcaptureui items` without a request source or connection,
+skips the callback that supplies `isButton`, and can finish in an empty
+XMLBrowser page. The defensive direct-command fallback classifies
+`origin=auto` plus no source as `button`, returns an `items` array, and then
+uses the same two-line `showBriefly` display.
 
 The recognition session has an overall deadline derived from its sample,
 worker, retry-delay, and retry-sample budgets. The direct UI request has an

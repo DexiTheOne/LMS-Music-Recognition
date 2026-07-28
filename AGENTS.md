@@ -191,7 +191,10 @@ Jive and Material Skin:
 - Register **Recognize Song** through `Slim::Menu::TrackInfo`, the current
   track/player **More** menu extension point.
 - Return a plain `name`, callback `url`, and `nextWindow => 'parent'` for
-  traditional-button clients. Control UIs receive an item-specific
+  traditional-button clients. A traditional row must not advertise `jive`
+  actions or `itemActions`: doing so makes SB2 invoke the direct list command
+  instead of the URL callback, so `isButton` is never supplied. Control UIs
+  receive an item-specific
   `shazamcaptureui items` action with a fixed `origin` parameter. The
   list-shaped command makes Material set its native `fetchingItem` state.
 - Use `parentNoRefresh` only on Material's `go` action so Material stays on
@@ -231,6 +234,12 @@ Jive and Material Skin:
   transport again. Do not infer origin inside the later URL
   callback: XMLBrowser re-fetches actions with `menu=trackinfo`, supplies no
   callback query, and TrackInfo uses a global cached feed.
+- A source-less, connection-less direct request with `origin=auto` is a
+  traditional-button fallback, not Jive. Classify it as `button`, complete it
+  with an `items` array, and schedule the same native two-line `showBriefly`
+  result. Without `items`, `Slim::Buttons::XMLBrowser` dereferences an
+  undefined array and leaves SB2 on a blank screen. Keep this fallback for
+  rows cached before a plugin reload.
 - Because a TrackInfo feed can outlive the request which built it, enforce the
   final recognition-row navigation while XMLBrowser serializes the row for the
   concrete request. Remove action-level and row-level `nextWindow` for
@@ -257,6 +266,11 @@ Jive and Material Skin:
 
 Known traps:
 
+- If SB2 shows its loading animation and then a blank screen, inspect the log
+  for `UI recognize command origin=jive source=<none> connection=<none>` and
+  `Can't use an undefined value as an ARRAY reference` from
+  `Slim/Buttons/XMLBrowser.pm`. That combination means a traditional row
+  incorrectly exposed the direct action or its fallback omitted `items`.
 - Cancellation and stopped PCM collection must complete the manual callback;
   otherwise the native loading state can remain indefinitely.
 - Material removes `itemplay`, `item_add`, and `item_insert` rows from More

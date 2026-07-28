@@ -108,8 +108,23 @@ Client-specific acceptance criteria:
   `Title — Artist — Album`.
 - SB2 shows its block animation while waiting, then artist on the small top
   line and title on the large bottom line.
+- After opening the SB2 row, the log must not show
+  `UI recognize command origin=jive source=<none> connection=<none>`. A fresh
+  row must use the URL callback and therefore receive `isButton`.
 - Triggering from SB2 must not create Jive or Material notifications;
   triggering from Jive must not create a Material notification, and vice versa.
+
+After the SB2 result appears, verify that the blank-screen regression did not
+occur:
+
+```bash
+tail -n 1000 "/Users/dexi/Library/Logs/Squeezebox/server.log" | \
+  rg -n -C 3 \
+  "origin=jive source=<none>|undefined value as an ARRAY reference.*XMLBrowser"
+```
+
+Expected: no matches for the tested request. This signature means SB2 was
+given a direct control-UI action or the cached-row fallback omitted `items`.
 
 ## UI structure verification
 
@@ -149,6 +164,12 @@ command verifies the transport again and remains pending until recognition
 completes, keeping each UI's native loader visible. Both terminal responses
 contain one text row. Do not add a custom type; Jive's terminal row uses the
 standard `itemNoAction` style so it cannot be selected.
+
+Traditional-button rows must not contain `actions`, `jive.actions`, or
+`itemActions`; those fields make SB2 bypass the callback URL. If a cached SB2
+row nevertheless reaches the direct command with `origin=auto` and no source,
+the response must contain an `items` array before the native result display is
+scheduled.
 
 Jive's terminal response must be a complete paged chunk with `offset=0`,
 `count=1`, and one inert `item_loop` row. Without `offset`, SqueezePlay treats

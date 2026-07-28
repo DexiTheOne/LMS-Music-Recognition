@@ -71,6 +71,8 @@ opening that child window, and SB2 displays the artist on its small top line
 and title on its large bottom line. Results are sent only to the UI path that
 started recognition. A separate UI deadline prevents a native loader from
 remaining active if the normal recognition callback path faults.
+SB2 deliberately receives only the traditional callback row; direct
+control-UI action metadata is reserved for Jive and Material Skin.
 
 ## Settings
 
