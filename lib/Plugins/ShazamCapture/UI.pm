@@ -311,12 +311,33 @@ sub _complete_command {
 	# Jive intentionally loads this response into the child window it prepared
 	# when the action began. Completing the request removes the inline wheel;
 	# the user returns through the child's normal Back action.
+	my @rows = _jive_result_rows($client, $result);
 	$request->addResult('offset', 0);
-	$request->addResult('count', 1);
-	$request->addResultLoop('item_loop', 0, 'text', $message);
-	$request->addResultLoop('item_loop', 0, 'style', 'itemNoAction');
-	$request->addResultLoop('item_loop', 0, 'action', 'none');
+	$request->addResult('count', scalar @rows);
+	for my $index (0 .. $#rows) {
+		$request->addResultLoop(
+			'item_loop', $index, 'text', $rows[$index]
+		);
+		$request->addResultLoop(
+			'item_loop', $index, 'style', 'itemNoAction'
+		);
+		$request->addResultLoop(
+			'item_loop', $index, 'action', 'none'
+		);
+	}
 	$request->setStatusDone();
+}
+
+sub _jive_result_rows {
+	my ($client, $result) = @_;
+	if (
+		$result->{ok} && $result->{matched} &&
+		$result->{track} && ref $result->{track} eq 'HASH'
+	) {
+		return map { _plain_text($_) }
+			@{$result->{track}}{qw(title artist album)};
+	}
+	return (_result_message($client, $result));
 }
 
 sub _complete_action {

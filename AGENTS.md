@@ -202,9 +202,9 @@ Jive and Material Skin:
   top-level row: SqueezePlay otherwise falls back to the row value and closes
   the More menu. With neither value present, Jive locks the current row with
   its inline wheel and pushes the terminal response as a child window with a
-  normal manual Back action. Return the terminal
-  message as each direct request's sole text row. Mark Material's response row
-  with inert
+  normal manual Back action. Return successful Jive matches as three inert
+  rows in title, artist, album order; errors and no-matches remain one row.
+  Mark Material's sole response row with inert
   `nextWindow => 'parentNoRefresh'` metadata to prevent Material from wrapping
   a sole non-clickable text row in browse-page HTML before sending it to the
   escaped snackbar. Leave the traditional-button row's top-level
@@ -215,9 +215,11 @@ Jive and Material Skin:
 - Direct control-UI commands must call `setStatusProcessing` before starting
   recognition and `setStatusDone` only for a terminal result; otherwise LMS
   completes JSON-RPC as soon as the dispatch handler returns.
-- Jive's terminal child response must include `offset => 0`, `count => 1`,
-  and one inert `item_loop` row. Omitting the offset makes SqueezePlay refetch
-  the same action as an unsatisfied page instead of settling the child window.
+- Jive's terminal child response must include `offset => 0`, an accurate
+  `count`, and inert `item_loop` rows. Successful matches contain title,
+  artist, and album rows in that order; errors and no-matches contain one row.
+  Omitting the offset makes SqueezePlay refetch the same action as an
+  unsatisfied page instead of settling the child window.
 - Do not send a **Listening** popup. Leave the callback pending so LMS's native
   block animation is visible on SB2 and Material's native loader remains
   visible. SqueezePlay/Jive replaces the selected row's right arrow with its

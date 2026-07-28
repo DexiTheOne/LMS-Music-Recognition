@@ -2,6 +2,9 @@
 
 ## 2026-07-28 — Jive inline recognition progress
 
+- Split successful Jive child-window results into three inert rows ordered as
+  song title, artist, and album. Material and traditional-player result
+  formatting remain unchanged.
 - Fixed named SqueezePlay/Jive TrackInfo requests being misclassified as
   Material. The retained direct-command transport is now authoritative:
   JSON-RPC routes to Material, while SqueezePlay/Comet routes to Jive.

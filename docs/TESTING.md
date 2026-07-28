@@ -161,9 +161,10 @@ Jive. Material's action must use `parentNoRefresh`; Jive's action must omit
 `nextWindow`, and Jive's row must also omit its top-level `nextWindow`.
 Traditional-button rows retain top-level `nextWindow=parent`. The direct
 command verifies the transport again and remains pending until recognition
-completes, keeping each UI's native loader visible. Both terminal responses
-contain one text row. Do not add a custom type; Jive's terminal row uses the
-standard `itemNoAction` style so it cannot be selected.
+completes, keeping each UI's native loader visible. Material contains one text
+row. A successful Jive match contains three rows in title, artist, album order;
+errors and no-matches contain one. Do not add a custom type; Jive's terminal
+rows use the standard `itemNoAction` style so they cannot be selected.
 
 Traditional-button rows must not contain `actions`, `jive.actions`, or
 `itemActions`; those fields make SB2 bypass the callback URL. If a cached SB2
@@ -171,10 +172,10 @@ row nevertheless reaches the direct command with `origin=auto` and no source,
 the response must contain an `items` array before the native result display is
 scheduled.
 
-Jive's terminal response must be a complete paged chunk with `offset=0`,
-`count=1`, and one inert `item_loop` row. Without `offset`, SqueezePlay treats
-the requested chunk as unsatisfied and repeats the recognition action instead
-of settling the child window.
+Jive's terminal response must be a complete paged chunk with `offset=0`, an
+accurate `count`, and inert `item_loop` rows. Without `offset`, SqueezePlay
+treats the requested chunk as unsatisfied and repeats the recognition action
+instead of settling the child window.
 
 After restart, confirm the request-context wrapper was installed:
 
