@@ -50,8 +50,12 @@ overlay option is enabled, successful automatic samples temporarily replace
 the radio title, artist, album, and artwork; manual samples never publish an
 overlay.
 
-The LMS **My Apps** menu includes **Shazam History**. It lists successful
-matches newest first; selecting a song opens its full metadata, source, player,
+The LMS **My Apps** menu includes **Shazam History**. Each player's plugin
+settings can independently limit the view to that player, apply a
+case-insensitive text filter by station, stream source, artist, song title,
+album, or capture type, and choose chronological or alphabetical ordering.
+The active scope, filter, and sort appear above the history rows. Selecting a
+song opens its full metadata, source, player,
 time, sample type, and external links. Missing artwork uses LMS's default cover image, and
 missing Spotify results are labeled **No Spotify Link Returned**.
 

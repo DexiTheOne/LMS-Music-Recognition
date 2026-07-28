@@ -1,5 +1,21 @@
 # Changelog and failure history
 
+## 2026-07-28 — Per-player history views
+
+- Added independent per-player Shazam History settings for current-player
+  scope, filter field and value, and sort order.
+- Added case-insensitive partial filtering by station, stream source, artist,
+  song title, album, or capture type. Filter columns and sort expressions are
+  whitelisted, values use bound parameters, and literal `%` and `_` characters
+  are treated as text rather than SQL wildcards.
+- Added newest/oldest, artist A-Z/Z-A, and song-title A-Z/Z-A ordering with
+  stable secondary ordering.
+- Disabled and cleared the filter value when **No filter** is selected. An
+  empty value also behaves as no filter.
+- Added a native browse summary above Shazam History showing either **All
+  players** or the selected player's display name, the active filter, and the
+  sort order.
+
 ## 2026-07-28 — History database management
 
 - Added a global-settings database selector for existing direct

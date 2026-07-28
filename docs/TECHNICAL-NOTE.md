@@ -67,7 +67,9 @@ is available:
   automatic cooldown, and active history database preferences in
   `plugin.shazamcapture`. It also handles independent database selection,
   backup, and guarded clear actions outside the ordinary preference-save path.
-- `PlayerSettings.pm` uses `needsClient` to provide the per-player page.
+- `PlayerSettings.pm` uses `needsClient` and client-scoped plugin preferences
+  to configure the history scope, text filter, and sort order independently
+  for each player.
 
 Recognition defaults to a 10-second initial sample, one additional attempt, one
 required confirmation (the first match is accepted), a 10-second retry sample,
@@ -112,7 +114,10 @@ metadata, and the external URLs returned by Shazam. An identical consecutive
 match on the same player is suppressed for ten minutes, while later
 recognitions of the same song remain separate events.
 
-The **Shazam History** OPML app lists the song title and remote artwork. If
+The **Shazam History** OPML app applies the initiating player's saved history
+scope, case-insensitive field filter, and whitelisted sort order using bound
+SQLite parameters. A native browse textarea summarizes the active settings
+above the rows. The app lists the song title and remote artwork. If
 Shazam supplies no artwork, the row uses LMS's `html/images/cover.png` rather
 than downloading or storing a local thumbnail. Detail pages expose all stored
 metadata. Apple Music, Spotify, and Shazam rows use LMS's `weblink` field so

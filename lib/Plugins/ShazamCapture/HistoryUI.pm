@@ -6,18 +6,88 @@ use Plugins::ShazamCapture::History;
 use Slim::Utils::Prefs;
 
 my $prefs = preferences('plugin.shazamcapture');
-$prefs->init({ showSpotifyInHistory => 1 });
+$prefs->init({
+	showSpotifyInHistory  => 1,
+	historyThisPlayerOnly => 0,
+	historyFilterField    => 'none',
+	historyFilterValue    => '',
+	historySortOrder      => 'newest',
+});
 
 sub feed {
 	return sub {
 		my ($client, $callback) = @_;
-		my $rows = Plugins::ShazamCapture::History::all_matches();
-		my @items = map { _history_item($_) } @$rows;
+		my $client_prefs = $client ? $prefs->client($client) : $prefs;
+		my $this_player = $client
+			&& $client_prefs->get('historyThisPlayerOnly');
+		my $filter_field = $client_prefs->get('historyFilterField') || 'none';
+		my $filter_value = $client_prefs->get('historyFilterValue') || '';
+		my $sort_order = $client_prefs->get('historySortOrder') || 'newest';
+		my $rows = Plugins::ShazamCapture::History::all_matches({
+			player_id    => $this_player ? $client->id : undef,
+			filter_field => $filter_field,
+			filter_value => $filter_value,
+			sort_order   => $sort_order,
+		});
+		my $subtitle = _subtitle(
+			$client, $this_player, $filter_field, $filter_value, $sort_order
+		);
+		my @items = (
+			{
+				name => $subtitle,
+				type => 'textarea',
+			},
+			map { _history_item($_) } @$rows,
+		);
 		$callback->({
 			title => 'Shazam History',
 			items => \@items,
 		});
 	};
+}
+
+sub _subtitle {
+	my ($client, $this_player, $filter_field, $filter_value, $sort_order) = @_;
+	my $scope = 'All players';
+	if ($this_player && $client) {
+		$scope = eval { $client->name } || eval { $client->id } || 'Selected player';
+	}
+	$scope = _plain_text($scope);
+	$filter_value = _plain_text($filter_value);
+
+	my %filter_labels = (
+		station => 'Station',
+		source  => 'Stream source',
+		artist  => 'Artist',
+		title   => 'Song title',
+		album   => 'Album',
+		capture => 'Capture type',
+	);
+	my $filter = 'No filter';
+	if ($filter_labels{$filter_field || ''} && length $filter_value) {
+		$filter = qq{$filter_labels{$filter_field} contains "$filter_value"};
+	}
+
+	my %sort_labels = (
+		newest      => 'Newest to Oldest',
+		oldest      => 'Oldest to Newest',
+		artist_asc  => 'Artist A-Z',
+		artist_desc => 'Artist Z-A',
+		title_asc   => 'Song Title A-Z',
+		title_desc  => 'Song Title Z-A',
+	);
+	my $sort = $sort_labels{$sort_order || ''} || $sort_labels{newest};
+	return join(' - ', $scope, $filter, $sort);
+}
+
+sub _plain_text {
+	my ($value) = @_;
+	$value = '' unless defined $value;
+	$value =~ s/[\x00-\x1f\x7f]+/ /g;
+	$value =~ s/[<>]//g;
+	$value =~ s/\s+/ /g;
+	$value =~ s/^\s+|\s+$//g;
+	return $value;
 }
 
 sub _history_item {

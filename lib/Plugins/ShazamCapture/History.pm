@@ -330,14 +330,55 @@ sub count {
 }
 
 sub all_matches {
+	my ($options) = @_;
 	return [] unless $dbh;
+	$options ||= {};
+
+	my @where = ('ok=1', 'matched=1');
+	my @bind;
+	if ($options->{player_id}) {
+		push @where, 'player_id=?';
+		push @bind, $options->{player_id};
+	}
+
+	my %filter_columns = (
+		station => 'source_name',
+		source  => 'technical_source',
+		artist  => 'artist',
+		title   => 'title',
+		album   => 'album',
+		capture => 'trigger_method',
+	);
+	my $filter_column = $filter_columns{$options->{filter_field} || ''};
+	my $filter_value = $options->{filter_value};
+	if ($filter_column && defined $filter_value && length $filter_value) {
+		$filter_value = lc $filter_value;
+		$filter_value =~ s/!/!!/g;
+		$filter_value =~ s/%/!%/g;
+		$filter_value =~ s/_/!_/g;
+		push @where,
+			"LOWER(COALESCE($filter_column,'')) LIKE ? ESCAPE '!'";
+		push @bind, "%$filter_value%";
+	}
+
+	my %sort_orders = (
+		newest     => 'recognized_at DESC,id DESC',
+		oldest     => 'recognized_at ASC,id ASC',
+		artist_asc => "LOWER(COALESCE(artist,'')) ASC,recognized_at DESC,id DESC",
+		artist_desc => "LOWER(COALESCE(artist,'')) DESC,recognized_at DESC,id DESC",
+		title_asc  => "LOWER(COALESCE(title,'')) ASC,recognized_at DESC,id DESC",
+		title_desc => "LOWER(COALESCE(title,'')) DESC,recognized_at DESC,id DESC",
+	);
+	my $order = $sort_orders{$options->{sort_order} || 'newest'}
+		|| $sort_orders{newest};
 	my $rows = $dbh->selectall_arrayref(
 		'SELECT id,recognized_at,player_id,generation,title,artist,album,shazam_key,'
 		. 'player_name,source_name,source_url,technical_source,apple_music_url,'
 		. 'spotify_url,artwork_url,shazam_url,trigger_method '
-		. 'FROM recognition_history WHERE ok=1 AND matched=1 '
-		. 'ORDER BY recognized_at DESC,id DESC',
+		. 'FROM recognition_history WHERE ' . join(' AND ', @where)
+		. " ORDER BY $order",
 		{ Slice => {} },
+		@bind,
 	);
 	for my $row (@$rows) {
 		$row->{recognized_at_iso} = strftime(

@@ -156,8 +156,9 @@ Do not move the Perl modules to the project root. LMS resolves
   while the shared decoder continues. Numeric settings use LMS enhanced sliders:
   `type="text"` with `stdedit sliderInput_MIN_MAX_STEP`; do not use raw
   `type="number"` controls.
-- `PlayerSettings.pm`: registers an intentionally non-configurable per-player
-  LMS settings page.
+- `PlayerSettings.pm`: registers client-scoped history display preferences:
+  optional current-player scope, a whitelisted case-insensitive field filter,
+  its text value, and chronological or alphabetical sort order.
 - `UI.pm`: adds **Recognize Song** to `Slim::Menu::TrackInfo` using LMS's
   native asynchronous callback pattern, leaves native loading animations
   visible, and routes terminal results only to the initiating UI path.

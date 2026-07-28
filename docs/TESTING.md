@@ -35,7 +35,19 @@ web UI:
 9. Confirm existing `spotify_url` database values are unchanged, then enable
    the setting again and confirm the Spotify row returns.
 10. Open settings for a selected physical player and select **Shazam Capture**.
-11. Confirm the page says that no configurable player settings are available.
+11. Confirm **Show only this player's history**, **Filter history by**,
+    **Filter value**, and **Sort order** are present.
+12. Confirm **No filter** disables the value field, while choosing Station,
+    Stream source, Artist, Song title, Album, or Capture type enables it.
+13. Save a Station filter such as `The Wave` with **Newest to Oldest** and
+    confirm those values remain selected for that player only.
+14. Open **My Apps → Shazam History** and confirm the summary reads like
+    `All players - Station contains "The Wave" - Newest to Oldest`.
+15. Enable the player-only checkbox and confirm the summary uses the selected
+    player's display name instead of **All players**, and that both the player
+    scope and text filter apply together.
+16. Confirm an empty filter value shows all records in the selected player
+    scope, and verify each chronological and alphabetical sort option.
 
 To compare manual sample modes with the same UI or CLI recognition action:
 

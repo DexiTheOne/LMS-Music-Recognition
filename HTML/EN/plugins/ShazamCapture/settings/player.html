@@ -1,10 +1,72 @@
 [% PROCESS settings/header.html %]
 
-	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_PLAYER_SETTINGS" desc="" %]
-		<div class="prefDesc">
-			[% "PLUGIN_SHAZAMCAPTURE_PLAYER_SETTINGS_EMPTY" | string %]
-		</div>
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_THIS_PLAYER" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_THIS_PLAYER_DESC" %]
+		<input type="checkbox"
+			name="pref_historyThisPlayerOnly"
+			id="historyThisPlayerOnly"
+			value="1"
+			[% IF prefs.historyThisPlayerOnly %]checked="checked"[% END %]
+		/>
 	[% END %]
 
-[% SET nosubmit = 1 %]
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_FIELD" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_FIELD_DESC" %]
+		<select name="pref_historyFilterField" id="historyFilterField"
+			onchange="document.getElementById('historyFilterValue').disabled=(this.value=='none');">
+			<option value="none" [% IF !prefs.historyFilterField || prefs.historyFilterField == "none" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_NONE" | string %]
+			</option>
+			<option value="station" [% IF prefs.historyFilterField == "station" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_STATION" | string %]
+			</option>
+			<option value="source" [% IF prefs.historyFilterField == "source" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_SOURCE" | string %]
+			</option>
+			<option value="artist" [% IF prefs.historyFilterField == "artist" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_ARTIST" | string %]
+			</option>
+			<option value="title" [% IF prefs.historyFilterField == "title" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_TITLE" | string %]
+			</option>
+			<option value="album" [% IF prefs.historyFilterField == "album" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_ALBUM" | string %]
+			</option>
+			<option value="capture" [% IF prefs.historyFilterField == "capture" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_CAPTURE" | string %]
+			</option>
+		</select>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_VALUE" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_VALUE_DESC" %]
+		<input type="text" class="stdedit"
+			name="pref_historyFilterValue"
+			id="historyFilterValue"
+			value="[% prefs.historyFilterValue | html %]"
+			size="40"
+			[% IF !prefs.historyFilterField || prefs.historyFilterField == "none" %]disabled="disabled"[% END %]
+		/>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_ORDER" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_ORDER_DESC" %]
+		<select name="pref_historySortOrder" id="historySortOrder">
+			<option value="newest" [% IF !prefs.historySortOrder || prefs.historySortOrder == "newest" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_NEWEST" | string %]
+			</option>
+			<option value="oldest" [% IF prefs.historySortOrder == "oldest" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_OLDEST" | string %]
+			</option>
+			<option value="artist_asc" [% IF prefs.historySortOrder == "artist_asc" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_ARTIST_ASC" | string %]
+			</option>
+			<option value="artist_desc" [% IF prefs.historySortOrder == "artist_desc" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_ARTIST_DESC" | string %]
+			</option>
+			<option value="title_asc" [% IF prefs.historySortOrder == "title_asc" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_TITLE_ASC" | string %]
+			</option>
+			<option value="title_desc" [% IF prefs.historySortOrder == "title_desc" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_SORT_TITLE_DESC" | string %]
+			</option>
+		</select>
+	[% END %]
+
 [% PROCESS settings/footer.html %]
