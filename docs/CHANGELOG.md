@@ -31,6 +31,10 @@
 - Made traditional-button completion authoritative before Material routing.
   SB2 results now always schedule the native two-line `showBriefly` display,
   even when TrackInfo's menu-mode hint resembles a Material request.
+- Stopped advertising control-UI list actions on traditional TrackInfo rows.
+  SB2 now follows the row's URL callback, which supplies `isButton` and returns
+  the native `showBriefly` payload. A source-less direct-command fallback also
+  returns the `items` array expected by XMLBrowser before showing the result.
 - Added a UI-request watchdog slightly beyond the recognition-session
   deadline. It completes the pending action with an error and cancels a
   stranded manual recognition, preventing an endless inline wheel even if the

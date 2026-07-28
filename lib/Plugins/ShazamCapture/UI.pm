@@ -93,20 +93,6 @@ sub track_info_item {
 
 	my $item = {
 		name => $client->string('PLUGIN_SHAZAMCAPTURE_RECOGNIZE'),
-		jive => {
-			actions => {
-				go => $go_action,
-			},
-		},
-		itemActions => {
-			allAvailableActionsDefined => 1,
-			items => {
-				command => ['shazamcaptureui', 'items'],
-				fixedParams => {
-					origin => $origin,
-				},
-			},
-		},
 		url  => sub {
 			my ($action_client, $cb, $params) = @_;
 			my $is_button = $params && $params->{isButton};
@@ -127,6 +113,25 @@ sub track_info_item {
 			) unless $started->{ok};
 		},
 	};
+	# Traditional XMLBrowser must follow the URL callback so it supplies
+	# isButton and receives the native showBriefly result. Advertising Jive
+	# actions on that row makes SB2 execute the direct list command instead.
+	if ($origin ne 'auto') {
+		$item->{jive} = {
+			actions => {
+				go => $go_action,
+			},
+		};
+		$item->{itemActions} = {
+			allAvailableActionsDefined => 1,
+			items => {
+				command => ['shazamcaptureui', 'items'],
+				fixedParams => {
+					origin => $origin,
+				},
+			},
+		};
+	}
 	# Traditional-button clients need to return to their parent after the URL
 	# callback. Do not expose that fallback to Jive: SqueezePlay applies the
 	# item's top-level nextWindow when its go action omits one, which would
@@ -183,7 +188,7 @@ sub _request_origin {
 	my ($request, $hint) = @_;
 	my $origin = _transport_origin($request->source);
 	return $origin if $origin;
-	return 'jive' if $hint eq 'auto';
+	return 'button' if $hint eq 'auto';
 	return $hint eq 'jive' ? 'jive' : 'material';
 }
 
@@ -218,6 +223,18 @@ sub _complete_command {
 		);
 	}
 	my $message = _result_message($client, $result);
+
+	if ($origin eq 'button') {
+		# Cached traditional rows may still invoke the direct command once.
+		# Complete it with the shape XMLBrowser expects, then show the native
+		# two-line result after its loading screen has unwound.
+		$request->addResult('items', []);
+		$request->setStatusDone();
+		Slim::Utils::Timers::setTimer(
+			$client, time() + 0.1, \&_show_sb2_result, $result
+		);
+		return;
+	}
 
 	if ($origin eq 'material') {
 		# Material keeps fetchingItem active while this list-shaped request is
