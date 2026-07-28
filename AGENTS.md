@@ -194,43 +194,45 @@ Jive and Material Skin:
   traditional-button clients. Control UIs receive an item-specific
   `shazamcaptureui items` action with a fixed `origin` parameter. The
   list-shaped command makes Material set its native `fetchingItem` state.
-- Use `parentNoRefresh` on the control/Jive `go` action so Material stays on
-  the current view. Return the terminal message as the direct request's sole
-  text row so Material displays that result—not the **Recognize Song** row
-  label—in its native popup. Mark that response row with inert
+- Use `parentNoRefresh` only on Material's `go` action so Material stays on
+  the current view. Omit `nextWindow` from Jive's action: SqueezePlay then
+  locks the current row with its inline wheel and pushes the terminal response
+  as a child window with a normal manual Back action. Return the terminal
+  message as each direct request's sole text row. Mark Material's response row
+  with inert
   `nextWindow => 'parentNoRefresh'` metadata to prevent Material from wrapping
   a sole non-clickable text row in browse-page HTML before sending it to the
   escaped snackbar. Leave the traditional-button row's top-level
   `nextWindow => 'parent'`.
 - The callback remains pending until recognition has a terminal result.
-  Material displays its native three-dot loader during that wait.
+  Material displays its native three-dot loader during that wait; Jive
+  displays its inline wheel.
 - Direct control-UI commands must call `setStatusProcessing` before starting
   recognition and `setStatusDone` only for a terminal result; otherwise LMS
   completes JSON-RPC as soon as the dispatch handler returns.
 - Do not send a **Listening** popup. Leave the callback pending so LMS's native
   block animation is visible on SB2 and Material's native loader remains
   visible. SqueezePlay/Jive replaces the selected row's right arrow with its
-  native inline wheel while the direct action request remains pending.
+  native inline wheel while the direct action request remains pending, then
+  opens the result child window.
 - The callback parameters identify traditional-button requests with
   `isButton`. Material uses both named TrackInfo modes and numeric `menu=1`;
-  Jive can also use named modes or numeric `menu=1`. Encode named modes as
-  `origin=material` and the ambiguous numeric mode as `origin=auto` in fixed
-  action parameters. The direct command treats its retained request transport
-  as authoritative: Material uses JSON-RPC and Jive uses SqueezePlay/Comet.
-  Do not infer origin inside the later URL
+  Jive can also use named modes or numeric `menu=1`. Wrap the TrackInfo items
+  dispatch and use its request transport while building the row: Material uses
+  JSON-RPC and Jive uses SqueezePlay/Comet. The direct command verifies the
+  retained transport again. Do not infer origin inside the later URL
   callback: XMLBrowser re-fetches actions with `menu=trackinfo`, supplies no
   callback query, and TrackInfo uses a global cached feed.
 - SB2 terminal matches use a traditional `line` display with artist on the
   small top line and title on the large bottom line.
 - Scope terminal delivery to the initiating path: SB2 receives only a line
-  display, Jive receives its popup, and Material receives its terminal list
-  response only on the initiating browser connection.
+  display, Jive receives its child result window, and Material receives its
+  terminal list response only on the initiating browser connection.
 - The session watchdog guarantees every accepted request eventually completes
   with a match, explicit no-match, or concise error.
 - A separate direct-UI watchdog runs five seconds beyond the session deadline
   and completes/cancels a stranded manual action so Jive's inline wheel and
   Material's loader cannot run forever if the normal callback path faults.
-- Jive popups use `$client->showBriefly` with `type => 'popupplay'`.
 - Traditional players use the same `showBriefly` call's `line` payload.
 - Material fallback popups use its supported
   `['material-skin', 'send-notif', ...]` command; the direct action returns its

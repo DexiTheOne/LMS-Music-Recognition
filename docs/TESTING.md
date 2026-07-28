@@ -83,24 +83,24 @@ UI inspection is manual; automated tests must not navigate the browser.
 1. Select a physical player playing a proxied radio stream.
 2. Open the current track/player **More** menu.
 3. Select **Recognize Song**.
-4. Confirm Jive and Material do not open a result page; SB2 may enter its
-   native callback level. Confirm the native loading animation remains until
-   recognition finishes.
+4. Confirm Jive remains on the current menu with an inline wheel until
+   recognition finishes, then opens a child result window. Confirm Material
+   does not open that child window; SB2 may enter its native callback level.
 5. Confirm the result reports title, artist, and album, or **No song
    found** / **Identification failed**.
 6. Confirm the behavior in Jive, Material, and SB2.
-7. Select **Recognize Song** again and confirm a new recognition starts.
+7. In Jive, use Back to return from the result child. Select **Recognize Song**
+   again and confirm a new recognition starts.
 8. Interrupt capture or change playback during a manual request and confirm
    progress is replaced by an error rather than remaining indefinitely.
 
 Client-specific acceptance criteria:
 
-- Jive remains on the current menu; it must not open an empty result page.
 - Jive replaces the **Recognize Song** row arrow with its inline wheel while
-  the request is pending, removes the wheel on every terminal path, and shows
-  the terminal popup only through Jive.
+  the request is pending, removes the wheel on every terminal path, and opens
+  one child window containing the terminal result and a working Back action.
 - Material remains on the current page and shows its three-dot loader while
-  recognition is pending.
+  recognition is pending; it must not open Jive's child result window.
 - The Material entry must be visible and clickable.
 - The Material terminal snackbar must contain only plain recognition text; it
   must not expose `<div>`, `style`, or other HTML decoration.
@@ -140,12 +140,12 @@ Expected shape:
 }
 ```
 
-Named modes may carry `origin=material` and numeric `menu=1` carries
-`origin=auto`, but the direct command's retained transport is authoritative:
-JSON-RPC is Material and SqueezePlay/Comet is Jive. Its request remains pending
-until recognition completes, which keeps each UI's native loader visible. The
-Material terminal response must contain one text row with the result, and the
-control action must use `parentNoRefresh`. Do not add a custom type or item
+The TrackInfo dispatch wrapper makes the menu request's transport authoritative
+while constructing the action: JSON-RPC is Material and SqueezePlay/Comet is
+Jive. Material's action must use `parentNoRefresh`; Jive's action must omit
+`nextWindow`. The direct command verifies the transport again and remains
+pending until recognition completes, keeping each UI's native loader visible.
+Both terminal responses contain one text row. Do not add a custom type or item
 style.
 
 ## Dependency checks

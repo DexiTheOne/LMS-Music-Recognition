@@ -6,7 +6,14 @@
   Material. The retained direct-command transport is now authoritative:
   JSON-RPC routes to Material, while SqueezePlay/Comet routes to Jive.
 - Jive's direct action remains processing so its native inline wheel replaces
-  the row arrow until completion, then only Jive receives the result popup.
+  the row arrow until completion. Its action deliberately omits `nextWindow`,
+  so SqueezePlay then opens the terminal result as a child window with a
+  manual Back action. Material alone retains `parentNoRefresh`; SB2 remains on
+  its traditional callback/display path.
+- Wrapped the existing TrackInfo items dispatch to retain its request transport
+  while the row is built. This separates Jive's child-window action metadata
+  from Material's non-navigating action even when both request named menu
+  modes.
 - Added a UI-request watchdog slightly beyond the recognition-session
   deadline. It completes the pending action with an error and cancels a
   stranded manual recognition, preventing an endless inline wheel even if the

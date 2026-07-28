@@ -38,7 +38,7 @@ one `showBriefly` / `nowPlaying` item after accepting recognition.
 |---|---|---|---|
 | Action | Native callback item | Native callback item | Native callback level |
 | Progress | Native inline wheel on the selected row | Native three-dot loader | Native block animation |
-| Completion | Jive-only `popupplay` | Scoped terminal list response | Replacement `line` display |
+| Completion | Child result window; manual Back | Scoped terminal list response | Replacement `line` display |
 | Match layout | Title, artist, album lines | `Title - Artist - Album` | Display lines |
 
 The recognition session has an overall deadline derived from its sample,

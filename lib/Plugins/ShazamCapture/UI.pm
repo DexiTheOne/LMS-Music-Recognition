@@ -7,12 +7,18 @@ use Slim::Utils::Log qw(logger);
 use Slim::Utils::Timers;
 
 my $log = logger('plugin.shazamcapture');
+my $trackinfo_dispatch;
+our $trackinfo_origin;
 
 sub init {
 	Slim::Menu::TrackInfo->registerInfoProvider( shazamCapture => (
 		before => 'top',
 		func   => \&track_info_item,
 	) );
+	$trackinfo_dispatch ||= Slim::Control::Request::addDispatch(
+		['trackinfo', 'items', '_index', '_quantity'],
+		[0, 1, 1, \&_trackinfo_query]
+	);
 	Slim::Control::Request::addDispatch(
 		['shazamcaptureui', 'recognize'],
 		[1, 0, 1, \&_recognize_command]
@@ -21,6 +27,12 @@ sub init {
 		['shazamcaptureui', 'items', '_index', '_quantity'],
 		[1, 1, 1, \&_recognize_command]
 	);
+}
+
+sub _trackinfo_query {
+	my ($request) = @_;
+	local $trackinfo_origin = _transport_origin($request->source);
+	return $trackinfo_dispatch->(@_);
 }
 
 sub track_info_item {
@@ -41,19 +53,26 @@ sub track_info_item {
 	my $is_material = length($menu_mode) && $menu_mode ne '1';
 	# Both Material and Jive request their More menu with menu=1. Material
 	# executes actions over JSON-RPC, while Jive executes them through Comet.
-	# Defer that ambiguous mode until the direct command retains its source.
-	my $origin = $is_material ? 'material' : 'auto';
+	# The dispatch wrapper makes that transport available while this provider
+	# builds the row. Fall back to the menu hint for nonstandard callers.
+	my $origin = $trackinfo_origin
+		|| ($is_material ? 'material' : 'auto');
+	my $go_action = {
+		player => 0,
+		cmd    => ['shazamcaptureui', 'items'],
+		params => { origin => $origin },
+	};
+	# Material must not pre-push a browse layer. Jive deliberately receives no
+	# nextWindow: it locks this menu while the request is pending, then pushes
+	# the terminal result as a child window with a normal Back action.
+	$go_action->{nextWindow} = 'parentNoRefresh'
+		unless $origin eq 'jive';
 
 	return [{
 		name => $client->string('PLUGIN_SHAZAMCAPTURE_RECOGNIZE'),
 		jive => {
 			actions => {
-				go => {
-					player     => 0,
-					cmd        => ['shazamcaptureui', 'items'],
-					params     => { origin => $origin },
-					nextWindow => 'parentNoRefresh',
-				},
+				go => $go_action,
 			},
 		},
 		itemActions => {
@@ -134,16 +153,20 @@ sub _recognize_command {
 
 sub _request_origin {
 	my ($request, $hint) = @_;
-	my $source = $request->source || '';
-
-	# The command retains the transport which actually invoked the action.
-	# That is more reliable than TrackInfo's menuMode: SqueezePlay/Jive can
-	# request a named mode which otherwise looks identical to Material.
-	return 'material' if $source eq 'JSONRPC';
-	return 'jive'
-		if $source =~ /SqueezePlay/i || $source =~ m{(?:^|/)slim/request(?:\||$)}i;
+	my $origin = _transport_origin($request->source);
+	return $origin if $origin;
 	return 'jive' if $hint eq 'auto';
 	return $hint eq 'jive' ? 'jive' : 'material';
+}
+
+sub _transport_origin {
+	my ($source) = @_;
+	$source ||= '';
+	return 'material' if $source eq 'JSONRPC';
+	return 'jive'
+		if $source =~ /SqueezePlay/i
+		|| $source =~ m{(?:^|/)slim/request(?:\||$)}i;
+	return;
 }
 
 sub _recognize_command_timed_out {
@@ -185,17 +208,13 @@ sub _complete_command {
 		return;
 	}
 
+	# Jive intentionally loads this response into the child window it prepared
+	# when the action began. Completing the request removes the inline wheel;
+	# the user returns through the child's normal Back action.
+	$request->addResultLoop('item_loop', 0, 'text', $message);
+	$request->addResultLoop('item_loop', 0, 'type', 'text');
+	$request->addResult('count', 1);
 	$request->setStatusDone();
-	$client->showBriefly({
-		jive => {
-			type     => 'popupplay',
-			text     => [$message],
-			duration => 10000,
-		},
-	}, {
-		duration => 10,
-		name     => 'shazamcapture',
-	});
 }
 
 sub _complete_action {
