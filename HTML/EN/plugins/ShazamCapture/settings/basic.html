@@ -86,6 +86,15 @@
 			value="[% prefs.consecutiveConfirmations | html %]" size="3" />
 	[% END %]
 
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_SKIP_CONFIRMATIONS_AFTER_TWO_NO_MATCHES" desc="PLUGIN_SHAZAMCAPTURE_SKIP_CONFIRMATIONS_AFTER_TWO_NO_MATCHES_DESC" %]
+		<input type="checkbox"
+			name="pref_skipConfirmationsAfterTwoNoMatches"
+			id="skipConfirmationsAfterTwoNoMatches"
+			value="1"
+			[% IF prefs.skipConfirmationsAfterTwoNoMatches %]checked="checked"[% END %]
+		/>
+	[% END %]
+
 	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_RETRY_SAMPLE_SECONDS" desc="PLUGIN_SHAZAMCAPTURE_RETRY_SAMPLE_SECONDS_DESC" %]
 		<input type="text" class="stdedit sliderInput_5_30_1"
 			name="pref_retrySampleSeconds" id="retrySampleSeconds"

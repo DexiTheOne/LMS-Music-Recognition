@@ -61,6 +61,7 @@ sub initPlugin {
 		sampleSeconds => 10,
 		retryCount => 1,
 		consecutiveConfirmations => 1,
+		skipConfirmationsAfterTwoNoMatches => 0,
 		retrySampleSeconds => 10,
 		retryDelaySeconds => 5,
 		autoRecognition => 0,
@@ -293,6 +294,9 @@ sub _new_session {
 		retries => _pref_int('retryCount', 0, 10, 1),
 		confirmations_required => _pref_int('consecutiveConfirmations', 1, 11, 1),
 		confirmations => 0,
+		leading_no_matches => 0,
+		skip_confirmations_after_two_no_matches =>
+			$prefs->get('skipConfirmationsAfterTwoNoMatches') ? 1 : 0,
 		retry_sample_seconds => _pref_int('retrySampleSeconds', 5, 30, 10),
 		retry_delay_seconds => _pref_int('retryDelaySeconds', 1, 30, 5),
 	};
@@ -375,6 +379,23 @@ sub _launch_attempt {
 			else {
 				$session->{confirmation_identity} = undef;
 				$session->{confirmations} = 0;
+				if (
+					$session->{attempt} <= 2
+					&& $session->{attempt} == $session->{leading_no_matches} + 1
+				) {
+					$session->{leading_no_matches}++;
+				}
+				if (
+					$session->{skip_confirmations_after_two_no_matches}
+					&& $session->{leading_no_matches} == 2
+					&& $session->{confirmations_required} > 1
+				) {
+					$session->{confirmations_required} = 1;
+					$log->info(
+						'first two recognition attempts returned no match; '
+						. 'consecutive confirmation is disabled for this session'
+					);
+				}
 			}
 		}
 		if ($result->{ok} && !$result->{stale} && $session->{attempt} <= $session->{retries}) {

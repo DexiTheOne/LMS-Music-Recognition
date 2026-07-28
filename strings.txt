@@ -109,6 +109,12 @@ PLUGIN_SHAZAMCAPTURE_CONSECUTIVE_CONFIRMATIONS
 PLUGIN_SHAZAMCAPTURE_CONSECUTIVE_CONFIRMATIONS_DESC
 	EN	Require the same Shazam result 1–11 times in a row before showing or saving it as a valid match. A value of 1 disables confirmation. Confirmation attempts use the existing retry count and delay. Default: 1.
 
+PLUGIN_SHAZAMCAPTURE_SKIP_CONFIRMATIONS_AFTER_TWO_NO_MATCHES
+	EN	Accept the first match after two no-results
+
+PLUGIN_SHAZAMCAPTURE_SKIP_CONFIRMATIONS_AFTER_TWO_NO_MATCHES_DESC
+	EN	If the first two Shazam attempts return no match, stop requiring consecutive confirmations for that recognition request and accept the next match. This requires at least two configured retries. Default: off.
+
 PLUGIN_SHAZAMCAPTURE_RETRY_SAMPLE_SECONDS
 	EN	Retry sample length (seconds)
 

@@ -1,5 +1,14 @@
 # Changelog and failure history
 
+## 2026-07-27 — Optional confirmation bypass after two no-matches
+
+- Added a default-off global toggle that disables consecutive confirmation for
+  the remainder of a recognition request when its first two Shazam attempts
+  both return no match.
+- When enabled, the next valid match is accepted immediately. A match among the
+  first two attempts, worker errors, and stale results do not activate the
+  bypass.
+
 ## 2026-07-27 — Native cross-client recognition action
 
 - Replaced the custom Jive command/style with LMS's native callback-menu

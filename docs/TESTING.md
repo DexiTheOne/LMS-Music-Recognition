@@ -24,14 +24,18 @@ web UI:
    than browser-native number boxes.
 5. Save boundary values and confirm they persist: sample lengths 5–30 seconds,
    retries 0–10, consecutive confirmations 1–11, and delay 1–30 seconds.
-6. Confirm **Show Spotify information in Shazam History** is available and is
+6. Confirm **Accept the first match after two no-results** is available and
+   defaults to off. Enable it with at least two retries and a confirmation
+   value above 1; after two initial no-matches, confirm the next match succeeds
+   without another confirmation attempt.
+7. Confirm **Show Spotify information in Shazam History** is available and is
    enabled by default.
-7. Disable it, save, and confirm history detail pages contain no Spotify link
+8. Disable it, save, and confirm history detail pages contain no Spotify link
    and no **No Spotify Link Returned** row.
-8. Confirm existing `spotify_url` database values are unchanged, then enable
+9. Confirm existing `spotify_url` database values are unchanged, then enable
    the setting again and confirm the Spotify row returns.
-9. Open settings for a selected physical player and select **Shazam Capture**.
-10. Confirm the page says that no configurable player settings are available.
+10. Open settings for a selected physical player and select **Shazam Capture**.
+11. Confirm the page says that no configurable player settings are available.
 
 To compare manual sample modes with the same UI or CLI recognition action:
 
