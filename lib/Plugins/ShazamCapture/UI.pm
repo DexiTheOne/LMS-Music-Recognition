@@ -8,6 +8,7 @@ use Slim::Utils::Timers;
 
 my $log = logger('plugin.shazamcapture');
 my $request_execute_original;
+my $set_result_loop_hash_original;
 our $active_request;
 
 sub init {
@@ -25,6 +26,17 @@ sub init {
 		no warnings 'redefine';
 		*Slim::Control::Request::execute = \&_execute_with_request;
 		$log->info('installed request-context wrapper for TrackInfo transport');
+	}
+	# TrackInfo feeds can outlive the request which built them. Apply the final
+	# navigation metadata while XMLBrowser serializes the row for a concrete
+	# connection, where the control UI's transport is authoritative.
+	unless ($set_result_loop_hash_original) {
+		$set_result_loop_hash_original
+			= \&Slim::Control::Request::setResultLoopHash;
+		no warnings 'redefine';
+		*Slim::Control::Request::setResultLoopHash
+			= \&_set_result_loop_hash_for_transport;
+		$log->info('installed result-row transport wrapper for UI navigation');
 	}
 	Slim::Control::Request::addDispatch(
 		['shazamcaptureui', 'recognize'],
@@ -47,6 +59,44 @@ sub _execute_with_request {
 		return $request_execute_original->(@_);
 	}
 	return scalar $request_execute_original->(@_);
+}
+
+sub _set_result_loop_hash_for_transport {
+	my ($request, $loop, $index, $row) = @_;
+	if (
+		ref $row eq 'HASH'
+		&& ref $row->{actions} eq 'HASH'
+		&& ref $row->{actions}->{go} eq 'HASH'
+		&& _is_recognition_items_command($row->{actions}->{go}->{cmd})
+	) {
+		my $action = $row->{actions}->{go};
+		my $origin = _transport_origin($request->source);
+		if ($origin) {
+			$action->{params} ||= {};
+			$action->{params}->{origin} = $origin;
+			if ($origin eq 'jive') {
+				delete $action->{nextWindow};
+				delete $row->{nextWindow};
+			}
+			else {
+				$action->{nextWindow} = 'parentNoRefresh';
+			}
+			$log->info(
+				'serialized UI row origin=' . $origin .
+				' source=' . ($request->source || '<none>') .
+				' nextWindow=' . ($action->{nextWindow} || '<child>')
+			);
+		}
+	}
+	return $set_result_loop_hash_original->(@_);
+}
+
+sub _is_recognition_items_command {
+	my ($command) = @_;
+	return ref $command eq 'ARRAY'
+		&& @$command == 2
+		&& $command->[0] eq 'shazamcaptureui'
+		&& $command->[1] eq 'items';
 }
 
 sub track_info_item {

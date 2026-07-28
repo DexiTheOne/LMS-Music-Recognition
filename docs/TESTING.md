@@ -158,9 +158,14 @@ of settling the child window.
 After restart, confirm the request-context wrapper was installed:
 
 ```bash
-rg -n "installed request-context wrapper for TrackInfo transport" \
+rg -n "installed (request-context|result-row transport) wrapper" \
   "/Users/dexi/Library/Logs/Squeezebox/server.log" | tail -1
 ```
+
+For an actual Jive More-menu fetch, the log must show a serialized row whose
+source contains `SqueezePlay` and whose `nextWindow` is `<child>`. Material's
+serialized row must show `origin=material` and
+`nextWindow=parentNoRefresh`.
 
 ## Dependency checks
 

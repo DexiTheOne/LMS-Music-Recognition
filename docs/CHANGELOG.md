@@ -28,6 +28,12 @@
   completed child menu. The terminal response now includes the required
   `offset => 0` paging metadata alongside `count => 1`, and its sole result row
   is explicitly non-actionable.
+- Fixed TrackInfo feed provenance overriding Jive navigation. The final
+  recognition-row action is now adjusted while XMLBrowser serializes it for a
+  concrete connection: SqueezePlay/Comet always receives no `nextWindow` at
+  either level, while JSON-RPC always receives action-level
+  `parentNoRefresh`. This remains correct even when the feed was built or
+  cached without the initiating request transport.
 - Made traditional-button completion authoritative before Material routing.
   SB2 results now always schedule the native two-line `showBriefly` display,
   even when TrackInfo's menu-mode hint resembles a Material request.
