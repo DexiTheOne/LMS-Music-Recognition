@@ -84,9 +84,9 @@ UI inspection is manual; automated tests must not navigate the browser.
 2. Open the current track/player **More** menu.
 3. Select **Recognize Song**.
 4. Confirm Jive and Material do not open a result page; SB2 may enter its
-   native callback level. Confirm **Identification in progress** appears and
-   remains until recognition finishes.
-5. Confirm a second popup reports title, artist, and album, or **No song
+   native callback level. Confirm the native loading animation remains until
+   recognition finishes.
+5. Confirm the result reports title, artist, and album, or **No song
    found** / **Identification failed**.
 6. Confirm the behavior in Jive, Material, and SB2.
 7. Select **Recognize Song** again and confirm a new recognition starts.
@@ -96,13 +96,15 @@ UI inspection is manual; automated tests must not navigate the browser.
 Client-specific acceptance criteria:
 
 - Jive remains on the current menu; it must not open an empty result page.
-- Material remains on the current page; it must not push an inner browse layer,
-  navigate Home, or show **Recognize Song** as a synthetic status popup.
+- Material remains on the current page and shows its three-dot loader while
+  recognition is pending.
 - The Material entry must be visible and clickable.
-- Jive match popup contains title, artist, and album as separate lines.
 - Material match popup contains all three fields as
   `Title — Artist — Album`.
-- SB2 shows persistent progress and replaces it with a terminal result.
+- SB2 shows its block animation while waiting, then artist on the small top
+  line and title on the large bottom line.
+- Triggering from SB2 must not create Jive or Material notifications;
+  triggering from Jive must not create a Material notification, and vice versa.
 
 ## UI structure verification
 
@@ -123,15 +125,23 @@ Expected shape:
   "text": "Recognize Song",
   "actions": {
     "go": {
-      "cmd": ["trackinfo", "items"],
-      "nextWindow": "parent"
+      "cmd": ["shazamcaptureui", "items"],
+      "params": {
+        "origin": "material"
+      },
+      "nextWindow": "parentNoRefresh"
     }
   }
 }
 ```
 
-Exact action parameters include the TrackInfo item identifier and current
-track context. Do not add a custom type, item style, or direct CLI action.
+Named Material modes must carry `origin=material` in fixed parameters. Numeric
+`menu=1`, used by both Material and Jive, must carry `origin=auto`; the direct
+command resolves JSON-RPC as Material and Comet as Jive. Its request remains
+pending until recognition completes, which is what keeps Material's native
+three-dot loader visible. The terminal response must contain one text row with
+the result, and the control action must use `parentNoRefresh`. Do not add a
+custom type or item style.
 
 ## Dependency checks
 

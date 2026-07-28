@@ -8,7 +8,7 @@ PLUGIN_SHAZAMCAPTURE_RECOGNIZE
 	EN	Recognize Song
 
 PLUGIN_SHAZAMCAPTURE_IN_PROGRESS
-	EN	Identification in progress
+	EN	Listening
 
 PLUGIN_SHAZAMCAPTURE_AUTO_ON
 	EN	Auto Recognition is on

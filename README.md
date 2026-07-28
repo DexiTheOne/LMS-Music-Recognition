@@ -61,12 +61,13 @@ converted to clickable `https://open.spotify.com/track/...` URLs.
 ## UI
 
 The selected track/player **More** menu includes **Recognize Song**. It is a
-terminal action, not a submenu. **Identification in progress** is followed by
-the match, **No song found**, or an error and remains visible until then.
+terminal action, not a submenu. LMS's native loading animation remains visible
+until the match, **No song found**, or an error is available.
 
-Jive receives multi-line `popupplay` messages. Material Skin receives native
-notifications with matches formatted as `Title — Artist — Album`. Traditional
-players receive the same progress and result through their line display.
+Jive receives its popup, Material Skin receives the result on the initiating
+browser response, and SB2 displays the artist on its small top line and title
+on its large bottom line. Results are sent only to the UI path that started
+recognition.
 
 ## Settings
 

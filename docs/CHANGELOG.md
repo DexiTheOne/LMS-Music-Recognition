@@ -11,10 +11,43 @@
 
 ## 2026-07-27 — Native cross-client recognition action
 
+- Fixed Material/Jive origin routing by encoding the TrackInfo context in fixed
+  parameters on a direct control-UI action. Named modes are Material; numeric
+  `menu=1`, which both Material and Jive use, is resolved by the direct
+  command's retained request source (JSON-RPC for Material, Comet for Jive).
+  XMLBrowser re-fetches callback rows with
+  `menu=trackinfo`, supplies no callback query, and uses a globally cached
+  TrackInfo feed; relying on the callback closure caused Material results to
+  leak to Jive while Material fell back to the **Recognize Song** item label.
+- Material's explicit action is list-shaped (`shazamcaptureui items`) so its
+  native `fetchingItem` state displays the three-dot loader for the lifetime of
+  the pending request. Its terminal response contains one result text row and
+  uses `parentNoRefresh`, so Material stays on the current view and displays
+  the result rather than synthesizing a popup from the original row label.
+  Missing or malformed action origins fail toward Material rather than leaking
+  a physical player popup to Jive.
+- Mark the direct recognition request as processing before starting
+  asynchronous work. Without that state LMS completed JSON-RPC immediately,
+  so Material removed its three-dot loader while recognition continued in the
+  background.
+- Classify every named TrackInfo menu mode as Material. Material can enter the
+  More menu through several named modes, so enumerating only `nowhere` and
+  `track` still misrouted some launches.
+- Documented that Jive has no native generic inline spinner for an ordinary
+  pending menu callback. Its server-provided processing UI applies only to
+  input/search actions; SB2 and Material retain their native loading states.
+- Removed Material **Listening** and keep-alive notifications. The native menu
+  callback now remains pending, leaving Material's three-dot loader visible
+  until a match, no-match, or error completes it.
+- Removed the Jive **Listening** popup. Pending callbacks expose LMS's native
+  block/loading animation on SB2; Jive has no equivalent for ordinary actions.
+- Added initiating-path result routing. SB2 gets artist on its small top line
+  and title on its large bottom line; Jive gets its popup; Material gets the
+  terminal response only on the browser connection that initiated it.
 - Replaced the custom Jive command/style with LMS's native callback-menu
   pattern used by Radio Artwork.
-- Added persistent Jive, Material, and SB2 progress displays that are replaced
-  by every match, no-match, cancellation, or error result.
+- Added terminal completion for every match, no-match, cancellation, or error
+  so native pending states cannot remain indefinitely.
 - Added a recognition-session watchdog derived from configured sample and
   retry budgets, preventing stopped PCM collection from waiting forever.
 - Manual playback cancellation now completes the UI callback with an error.
@@ -232,7 +265,7 @@
 - Send Material notifications directly with its documented seconds-based
   timeout instead of gating them on PluginManager's internal module key.
 - Use a terminal `parentNoRefresh` action for both clients. Material receives
-  **Identification in progress** in the action response, while asynchronous
+  **Listening** in the action response, while asynchronous
   result/error messages continue through its native notification channel.
 - Mark the terminal entry as an actionable `itemplay` text row, preventing
   Material from pre-pushing a browse layer while retaining Jive behavior.
@@ -253,7 +286,7 @@ differently after it is selected.
 
 Initial implementation returned a `url` callback from the TrackInfo provider.
 Entering **Recognize Song** started recognition and showed
-**Identification in progress** as a submenu row.
+**Listening** as a submenu row.
 
 Failure: LMS did not push completion into the open menu. Exiting and re-entering
 started a new recognition, so the completed result was never visible.
@@ -333,13 +366,12 @@ Fix: keep the Jive array and flatten Material to
 
 ### Final working UI contract
 
-- TrackInfo provider item: `type => 'text'`.
-- Plugin-specific actionable style: `item_shazamcapture`.
-- Direct action: `shazamcaptureui recognize`.
+- TrackInfo provider item: plain text with no custom type or style.
+- Direct action: `shazamcaptureui items`.
 - Terminal behavior: `nextWindow => 'parentNoRefresh'`.
-- Immediate response: one **Identification in progress** text item.
+- Pending behavior: Material's native `fetchingItem` three-dot loader.
 - Jive: `showBriefly` with `popupplay`.
-- Material: `material-skin send-notif`.
+- Material: one terminal text row on the initiating JSON-RPC response.
 - Completion: match, explicit no-match, or concise error.
 - Every click starts a fresh recognition; no old result is shown on entry.
 

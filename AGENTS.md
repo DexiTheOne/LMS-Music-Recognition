@@ -157,8 +157,8 @@ Do not move the Perl modules to the project root. LMS resolves
 - `PlayerSettings.pm`: registers an intentionally non-configurable per-player
   LMS settings page.
 - `UI.pm`: adds **Recognize Song** to `Slim::Menu::TrackInfo` using LMS's
-  native callback-action pattern and sends persistent progress plus terminal
-  results through Jive, Material Skin, and traditional-player display paths.
+  native asynchronous callback pattern, leaves native loading animations
+  visible, and routes terminal results only to the initiating UI path.
 - `python/recognize.py`: confines input/output paths to the plugin root,
   converts a PCM snapshot to WAV, invokes `Shazam().recognize()`, and emits one
   normalized JSON object including Apple Music, Spotify, Shazam, and artwork
@@ -190,17 +190,45 @@ Jive and Material Skin:
 
 - Register **Recognize Song** through `Slim::Menu::TrackInfo`, the current
   track/player **More** menu extension point.
-- Match LMS's Radio Artwork action: return a plain `name`, callback `url`, and
-  `nextWindow => 'parent'`; do not add a custom type, style, or Jive action.
-- The callback starts recognition and returns one `showBriefly => 1`,
-  `nowPlaying => 1` item containing **Identification in progress**.
-- Keep progress visible until the recognition callback replaces it. Use a
-  session watchdog and a slightly longer display safety timeout so every
-  accepted request ends in a match, explicit no-match, or concise error.
+- Return a plain `name`, callback `url`, and `nextWindow => 'parent'` for
+  traditional-button clients. Control UIs receive an item-specific
+  `shazamcaptureui items` action with a fixed `origin` parameter. The
+  list-shaped command makes Material set its native `fetchingItem` state.
+- Use `parentNoRefresh` on the control/Jive `go` action so Material stays on
+  the current view. Return the terminal message as the direct request's sole
+  text row so Material displays that result—not the **Recognize Song** row
+  label—in its native popup. Leave the traditional-button row's top-level
+  `nextWindow => 'parent'`.
+- The callback remains pending until recognition has a terminal result.
+  Material displays its native three-dot loader during that wait.
+- Direct control-UI commands must call `setStatusProcessing` before starting
+  recognition and `setStatusDone` only for a terminal result; otherwise LMS
+  completes JSON-RPC as soon as the dispatch handler returns.
+- Do not send a **Listening** popup. Leave the callback pending so LMS's native
+  block animation is visible on SB2 and Material's native loader remains
+  visible. Jive does not provide a generic inline spinner for ordinary pending
+  menu actions; its `processingPopup` metadata is limited to input/search
+  actions.
+- The callback parameters identify traditional-button requests with
+  `isButton`. Material uses both named TrackInfo modes and numeric `menu=1`;
+  Jive also uses numeric `menu=1`. Encode named modes as `origin=material` and
+  the ambiguous numeric mode as `origin=auto` in fixed action parameters. The
+  direct command resolves `auto` from its retained request source: Material
+  uses JSON-RPC and Jive uses Comet. Do not infer origin inside the later URL
+  callback: XMLBrowser re-fetches actions with `menu=trackinfo`, supplies no
+  callback query, and TrackInfo uses a global cached feed.
+- SB2 terminal matches use a traditional `line` display with artist on the
+  small top line and title on the large bottom line.
+- Scope terminal delivery to the initiating path: SB2 receives only a line
+  display, Jive receives its popup, and Material receives its terminal list
+  response only on the initiating browser connection.
+- The session watchdog guarantees every accepted request eventually completes
+  with a match, explicit no-match, or concise error.
 - Jive popups use `$client->showBriefly` with `type => 'popupplay'`.
 - Traditional players use the same `showBriefly` call's `line` payload.
-- Material popups use its supported
-  `['material-skin', 'send-notif', ...]` command.
+- Material fallback popups use its supported
+  `['material-skin', 'send-notif', ...]` command; the direct action returns its
+  terminal popup text on the initiating JSON-RPC response.
 - Material timeout values are seconds. Jive's payload duration is
   milliseconds; the outer `showBriefly` duration is seconds.
 - Jive accepts multiple lines. Material is single-line; format matches as
@@ -209,12 +237,8 @@ Jive and Material Skin:
 
 Known traps:
 
-- Do not use `block => 1` for persistent progress: LMS then rejects the result
-  `showBriefly` call that must replace it.
-- Guard the delayed persistent-progress call so a fast result cannot be
-  overwritten by **Identification in progress**.
 - Cancellation and stopped PCM collection must complete the manual callback;
-  otherwise the persistent progress display can outlive the recognition.
+  otherwise the native loading state can remain indefinitely.
 - Material removes `itemplay`, `item_add`, and `item_insert` rows from More
   menus as duplicate built-in controls.
 - Newline-delimited Material messages show only the first field.
