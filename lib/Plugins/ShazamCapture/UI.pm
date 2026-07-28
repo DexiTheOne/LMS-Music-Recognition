@@ -166,9 +166,11 @@ sub track_info_item {
 		},
 	};
 	# Traditional XMLBrowser must follow the URL callback so it supplies
-	# isButton and receives the native showBriefly result. Advertising Jive
-	# actions on that row makes SB2 execute the direct list command instead.
-	if ($origin ne 'auto') {
+	# isButton and receives the native showBriefly result. A source-less
+	# control-UI row still needs the neutral direct action: SqueezePlay can
+	# cache and select that row after a transport-specific refresh. Traditional
+	# rows have no menuMode and therefore keep only the URL callback.
+	if ($origin ne 'auto' || length($menu_mode)) {
 		$item->{jive} = {
 			actions => {
 				go => $go_action,

@@ -39,6 +39,10 @@
   control rows now remain navigation-neutral; only explicit JSON-RPC receives
   `parentNoRefresh`, and only a request without control-menu mode receives the
   traditional-button row-level `parent`.
+- Retained the neutral direct action on source-less control-menu rows.
+  SqueezePlay can select that cached row after its Jive-specific refresh;
+  keeping the action lets the live Comet request receive the populated paged
+  result instead of falling back to an empty URL-callback child page.
 - Made traditional-button completion authoritative before Material routing.
   SB2 results now always schedule the native two-line `showBriefly` display,
   even when TrackInfo's menu-mode hint resembles a Material request.

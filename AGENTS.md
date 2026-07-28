@@ -247,6 +247,11 @@ Jive and Material Skin:
 - Treat source-less control-menu requests as transport-neutral even when their
   named menu mode is `track`; SqueezePlay can use that shape internally. Only
   explicit JSON-RPC is evidence for Material navigation metadata.
+- Retain a navigation-neutral direct action on those source-less control-menu
+  rows. Jive can select the cached neutral row after its transport-specific
+  TrackInfo refresh; without the action it falls back to the URL callback and
+  opens an empty child page. Traditional rows have no `menuMode` and retain
+  only the URL callback.
 - SB2 terminal matches use a traditional `line` display with artist on the
   small top line and title on the large bottom line.
 - Scope terminal delivery to the initiating path: SB2 receives only a line
