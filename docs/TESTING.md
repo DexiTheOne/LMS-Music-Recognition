@@ -140,13 +140,27 @@ Expected shape:
 }
 ```
 
-The TrackInfo dispatch wrapper makes the menu request's transport authoritative
+The request-context wrapper makes the menu request's transport authoritative
 while constructing the action: JSON-RPC is Material and SqueezePlay/Comet is
 Jive. Material's action must use `parentNoRefresh`; Jive's action must omit
-`nextWindow`. The direct command verifies the transport again and remains
-pending until recognition completes, keeping each UI's native loader visible.
-Both terminal responses contain one text row. Do not add a custom type or item
-style.
+`nextWindow`, and Jive's row must also omit its top-level `nextWindow`.
+Traditional-button rows retain top-level `nextWindow=parent`. The direct
+command verifies the transport again and remains pending until recognition
+completes, keeping each UI's native loader visible. Both terminal responses
+contain one text row. Do not add a custom type; Jive's terminal row uses the
+standard `itemNoAction` style so it cannot be selected.
+
+Jive's terminal response must be a complete paged chunk with `offset=0`,
+`count=1`, and one inert `item_loop` row. Without `offset`, SqueezePlay treats
+the requested chunk as unsatisfied and repeats the recognition action instead
+of settling the child window.
+
+After restart, confirm the request-context wrapper was installed:
+
+```bash
+rg -n "installed request-context wrapper for TrackInfo transport" \
+  "/Users/dexi/Library/Logs/Squeezebox/server.log" | tail -1
+```
 
 ## Dependency checks
 

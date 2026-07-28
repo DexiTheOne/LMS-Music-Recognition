@@ -7,18 +7,25 @@ use Slim::Utils::Log qw(logger);
 use Slim::Utils::Timers;
 
 my $log = logger('plugin.shazamcapture');
-my $trackinfo_dispatch;
-our $trackinfo_origin;
+my $request_execute_original;
+our $active_request;
 
 sub init {
 	Slim::Menu::TrackInfo->registerInfoProvider( shazamCapture => (
 		before => 'top',
 		func   => \&track_info_item,
 	) );
-	$trackinfo_dispatch ||= Slim::Control::Request::addDispatch(
-		['trackinfo', 'items', '_index', '_quantity'],
-		[0, 1, 1, \&_trackinfo_query]
-	);
+	# SqueezePlay can retain Request objects whose TrackInfo function pointer
+	# was resolved before plugin initialization. Every such object still goes
+	# through Request::execute, so retain the active request only for that
+	# synchronous execution. The provider can then classify its transport
+	# without changing or replacing the cached TrackInfo handler.
+	unless ($request_execute_original) {
+		$request_execute_original = \&Slim::Control::Request::execute;
+		no warnings 'redefine';
+		*Slim::Control::Request::execute = \&_execute_with_request;
+		$log->info('installed request-context wrapper for TrackInfo transport');
+	}
 	Slim::Control::Request::addDispatch(
 		['shazamcaptureui', 'recognize'],
 		[1, 0, 1, \&_recognize_command]
@@ -29,10 +36,17 @@ sub init {
 	);
 }
 
-sub _trackinfo_query {
-	my ($request) = @_;
-	local $trackinfo_origin = _transport_origin($request->source);
-	return $trackinfo_dispatch->(@_);
+sub _execute_with_request {
+	my $want = wantarray;
+	local $active_request = $_[0];
+	if (!defined $want) {
+		$request_execute_original->(@_);
+		return;
+	}
+	if ($want) {
+		return $request_execute_original->(@_);
+	}
+	return scalar $request_execute_original->(@_);
 }
 
 sub track_info_item {
@@ -53,9 +67,12 @@ sub track_info_item {
 	my $is_material = length($menu_mode) && $menu_mode ne '1';
 	# Both Material and Jive request their More menu with menu=1. Material
 	# executes actions over JSON-RPC, while Jive executes them through Comet.
-	# The dispatch wrapper makes that transport available while this provider
+	# The request-context wrapper makes that transport available while this provider
 	# builds the row. Fall back to the menu hint for nonstandard callers.
-	my $origin = $trackinfo_origin
+	my $request_origin = $active_request
+		? _transport_origin($active_request->source)
+		: undef;
+	my $origin = $request_origin
 		|| ($is_material ? 'material' : 'auto');
 	my $go_action = {
 		player => 0,
@@ -67,8 +84,14 @@ sub track_info_item {
 	# the terminal result as a child window with a normal Back action.
 	$go_action->{nextWindow} = 'parentNoRefresh'
 		unless $origin eq 'jive';
+	$log->info(
+		'UI TrackInfo row origin=' . $origin .
+		' transport=' . ($request_origin || '<none>') .
+		' menu=' . (length($menu_mode) ? $menu_mode : '<none>') .
+		' nextWindow=' . ($go_action->{nextWindow} || '<child>')
+	);
 
-	return [{
+	my $item = {
 		name => $client->string('PLUGIN_SHAZAMCAPTURE_RECOGNIZE'),
 		jive => {
 			actions => {
@@ -103,8 +126,13 @@ sub track_info_item {
 				$is_button, !$is_button && $is_material
 			) unless $started->{ok};
 		},
-		nextWindow => 'parent',
-	}];
+	};
+	# Traditional-button clients need to return to their parent after the URL
+	# callback. Do not expose that fallback to Jive: SqueezePlay applies the
+	# item's top-level nextWindow when its go action omits one, which would
+	# close the More menu before the pending child request can show its wheel.
+	$item->{nextWindow} = 'parent' unless $origin eq 'jive';
+	return [$item];
 }
 
 sub _recognize_command {
@@ -211,15 +239,31 @@ sub _complete_command {
 	# Jive intentionally loads this response into the child window it prepared
 	# when the action began. Completing the request removes the inline wheel;
 	# the user returns through the child's normal Back action.
-	$request->addResultLoop('item_loop', 0, 'text', $message);
-	$request->addResultLoop('item_loop', 0, 'type', 'text');
+	$request->addResult('offset', 0);
 	$request->addResult('count', 1);
+	$request->addResultLoop('item_loop', 0, 'text', $message);
+	$request->addResultLoop('item_loop', 0, 'style', 'itemNoAction');
+	$request->addResultLoop('item_loop', 0, 'action', 'none');
 	$request->setStatusDone();
 }
 
 sub _complete_action {
 	my ($client, $cb, $result, $is_button, $is_material) = @_;
 	my $message = _result_message($client, $result);
+
+	if ($is_button) {
+		$cb->({
+			items => [{
+				name        => $message,
+				showBriefly => 1,
+				nowPlaying  => 1,
+			}]
+		});
+		Slim::Utils::Timers::setTimer(
+			$client, time() + 0.1, \&_show_sb2_result, $result
+		);
+		return;
+	}
 
 	if ($is_material) {
 		# Do not publish a player display popup: that can leak into Jive UIs
@@ -239,12 +283,6 @@ sub _complete_action {
 			nowPlaying  => 1,
 		}]
 	});
-
-	if ($is_button) {
-		Slim::Utils::Timers::setTimer(
-			$client, time() + 0.1, \&_show_sb2_result, $result
-		);
-	}
 }
 
 sub _result_message {

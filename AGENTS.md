@@ -195,9 +195,11 @@ Jive and Material Skin:
   `shazamcaptureui items` action with a fixed `origin` parameter. The
   list-shaped command makes Material set its native `fetchingItem` state.
 - Use `parentNoRefresh` only on Material's `go` action so Material stays on
-  the current view. Omit `nextWindow` from Jive's action: SqueezePlay then
-  locks the current row with its inline wheel and pushes the terminal response
-  as a child window with a normal manual Back action. Return the terminal
+  the current view. Omit `nextWindow` from both Jive's action and its
+  top-level row: SqueezePlay otherwise falls back to the row value and closes
+  the More menu. With neither value present, Jive locks the current row with
+  its inline wheel and pushes the terminal response as a child window with a
+  normal manual Back action. Return the terminal
   message as each direct request's sole text row. Mark Material's response row
   with inert
   `nextWindow => 'parentNoRefresh'` metadata to prevent Material from wrapping
@@ -210,6 +212,9 @@ Jive and Material Skin:
 - Direct control-UI commands must call `setStatusProcessing` before starting
   recognition and `setStatusDone` only for a terminal result; otherwise LMS
   completes JSON-RPC as soon as the dispatch handler returns.
+- Jive's terminal child response must include `offset => 0`, `count => 1`,
+  and one inert `item_loop` row. Omitting the offset makes SqueezePlay refetch
+  the same action as an unsatisfied page instead of settling the child window.
 - Do not send a **Listening** popup. Leave the callback pending so LMS's native
   block animation is visible on SB2 and Material's native loader remains
   visible. SqueezePlay/Jive replaces the selected row's right arrow with its
@@ -217,10 +222,13 @@ Jive and Material Skin:
   opens the result child window.
 - The callback parameters identify traditional-button requests with
   `isButton`. Material uses both named TrackInfo modes and numeric `menu=1`;
-  Jive can also use named modes or numeric `menu=1`. Wrap the TrackInfo items
-  dispatch and use its request transport while building the row: Material uses
-  JSON-RPC and Jive uses SqueezePlay/Comet. The direct command verifies the
-  retained transport again. Do not infer origin inside the later URL
+  Jive can also use named modes or numeric `menu=1`. Retain the active
+  `Slim::Control::Request` only for the dynamic scope of its common `execute`
+  method and use that request's transport while building the row: Material
+  uses JSON-RPC and Jive uses SqueezePlay/Comet. This is required because
+  SqueezePlay can retain TrackInfo request objects whose handler pointer
+  predates plugin initialization. The direct command verifies the retained
+  transport again. Do not infer origin inside the later URL
   callback: XMLBrowser re-fetches actions with `menu=trackinfo`, supplies no
   callback query, and TrackInfo uses a global cached feed.
 - SB2 terminal matches use a traditional `line` display with artist on the

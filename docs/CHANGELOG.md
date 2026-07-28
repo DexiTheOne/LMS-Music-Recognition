@@ -14,6 +14,23 @@
   while the row is built. This separates Jive's child-window action metadata
   from Material's non-navigating action even when both request named menu
   modes.
+- Fixed Jive still returning Home despite its action omitting `nextWindow`.
+  SqueezePlay falls back to the row's top-level `nextWindow => 'parent'`;
+  Jive's generated row now omits that traditional-button navigation value as
+  well. Material retains its action-level `parentNoRefresh`, and traditional
+  clients retain the row-level `parent`.
+- Captured the active request around LMS's common request executor. SqueezePlay
+  can retain TrackInfo request objects whose handler pointer predates plugin
+  initialization, so replacing either the dispatch or TrackInfo handler could
+  not affect them. The executor remains dynamically resolved and exposes the
+  initiating transport while the provider synchronously builds its row.
+- Fixed Jive repeatedly issuing recognition requests instead of settling the
+  completed child menu. The terminal response now includes the required
+  `offset => 0` paging metadata alongside `count => 1`, and its sole result row
+  is explicitly non-actionable.
+- Made traditional-button completion authoritative before Material routing.
+  SB2 results now always schedule the native two-line `showBriefly` display,
+  even when TrackInfo's menu-mode hint resembles a Material request.
 - Added a UI-request watchdog slightly beyond the recognition-session
   deadline. It completes the pending action with an error and cancels a
   stranded manual recognition, preventing an endless inline wheel even if the
