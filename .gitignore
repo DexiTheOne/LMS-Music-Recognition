@@ -1,0 +1,19 @@
+.DS_Store
+**/.DS_Store
+
+# Python environment and caches
+python/venv/
+**/__pycache__/
+*.py[cod]
+
+# Plugin runtime state and recognition evidence
+var/history.sqlite3
+var/history.sqlite3-*
+var/tmp/*
+var/dumps/*
+var/logs/*
+
+# Preserve runtime directory structure
+!var/tmp/.gitkeep
+!var/dumps/.gitkeep
+!var/logs/.gitkeep

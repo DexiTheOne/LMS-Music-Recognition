@@ -1,0 +1,125 @@
+PLUGIN_SHAZAMCAPTURE
+	EN	Shazam Capture
+
+PLUGIN_SHAZAMCAPTURE_DESC
+	EN	Diagnostic capture and recognition of proxied player audio
+
+PLUGIN_SHAZAMCAPTURE_RECOGNIZE
+	EN	Recognize Song
+
+PLUGIN_SHAZAMCAPTURE_IN_PROGRESS
+	EN	Identification in progress
+
+PLUGIN_SHAZAMCAPTURE_AUTO_ON
+	EN	Auto Recognition is on
+
+PLUGIN_SHAZAMCAPTURE_NO_MATCH
+	EN	No song found
+
+PLUGIN_SHAZAMCAPTURE_ERROR
+	EN	Identification failed
+
+PLUGIN_SHAZAMCAPTURE_TITLE
+	EN	Title
+
+PLUGIN_SHAZAMCAPTURE_ARTIST
+	EN	Artist
+
+PLUGIN_SHAZAMCAPTURE_ALBUM
+	EN	Album
+
+PLUGIN_SHAZAMCAPTURE_HISTORY_APP
+	EN	Shazam History
+
+PLUGIN_SHAZAMCAPTURE_PLAYER_SETTINGS
+	EN	Shazam Capture
+
+PLUGIN_SHAZAMCAPTURE_SETTINGS_EMPTY
+	EN	There are no configurable plugin settings yet.
+
+PLUGIN_SHAZAMCAPTURE_SHOW_SPOTIFY_HISTORY
+	EN	Show Spotify information in Shazam History
+
+PLUGIN_SHAZAMCAPTURE_SHOW_SPOTIFY_HISTORY_DESC
+	EN	Show the Spotify link or missing-link message on history detail pages. Recognition and database storage are unaffected.
+
+PLUGIN_SHAZAMCAPTURE_FLUSH_SAME_STREAM_METADATA
+	EN	Clear recognition audio when metadata changes on the same stream
+
+PLUGIN_SHAZAMCAPTURE_FLUSH_SAME_STREAM_METADATA_DESC
+	EN	When enabled, pause PCM collection as soon as metadata changes on an unchanged stream. After the change remains stable for two seconds, collection restarts from zero and identification waits for a fully fresh sample. Applies to Radio, SpotOn, and other sources that reuse one stream. Disabled by default.
+
+PLUGIN_SHAZAMCAPTURE_SAVE_DEBUG_WAV
+	EN	Save recognition audio for debugging
+
+PLUGIN_SHAZAMCAPTURE_SAVE_DEBUG_WAV_DESC
+	EN	Keep the exact normalized WAV sent to Shazam in var/dumps. Files are named from the result title and local date/time, or NoResult when no title is returned. Files must be deleted manually. Disabled by default.
+
+PLUGIN_SHAZAMCAPTURE_AUTO_RECOGNITION
+	EN	Automatically recognize radio streams
+
+PLUGIN_SHAZAMCAPTURE_AUTO_RECOGNITION_DESC
+	EN	Continuously identify eligible Radio and HLS playlist streams on each player. Other plugin sources such as Spotty are excluded. Disabled by default.
+
+PLUGIN_SHAZAMCAPTURE_AUTO_METADATA_OVERLAY
+	EN	Replace radio metadata with automatic recognition results
+
+PLUGIN_SHAZAMCAPTURE_AUTO_METADATA_OVERLAY_DESC
+	EN	Publish title, artist, album, and artwork from successful automatic samples. Manual samples never change now-playing metadata. This setting is used only when automatic recognition is enabled.
+
+PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS
+	EN	Stations excluded from automatic recognition
+
+PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS_DESC
+	EN	Comma-separated LMS station names matched without regard to capitalization, for example: Yacht Radio, Wave FM.
+
+PLUGIN_SHAZAMCAPTURE_AUTO_COOLDOWN_SECONDS
+	EN	Automatic recognition cooldown (seconds)
+
+PLUGIN_SHAZAMCAPTURE_AUTO_COOLDOWN_SECONDS_DESC
+	EN	Wait 30–900 seconds after a successful recognition or an exhausted trial sequence before starting the next automatic sample. Default: 120.
+
+PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_MODE
+	EN	Manual identification sample
+
+PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_MODE_DESC
+	EN	Buffered sample uses recent PCM and waits if needed to reach the configured initial length. Fresh sample clears PCM when identification is accepted, then waits for that same length. FFmpeg and PCM capture remain active in both modes.
+
+PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_BUFFERED
+	EN	Buffered sample
+
+PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_FRESH
+	EN	Fresh sample
+
+PLUGIN_SHAZAMCAPTURE_SAMPLE_SECONDS
+	EN	Initial sample length (seconds)
+
+PLUGIN_SHAZAMCAPTURE_SAMPLE_SECONDS_DESC
+	EN	Wait until 5–30 seconds of PCM are available, then analyze that initial sample. Default: 10.
+
+PLUGIN_SHAZAMCAPTURE_RETRY_COUNT
+	EN	No-match retries
+
+PLUGIN_SHAZAMCAPTURE_RETRY_COUNT_DESC
+	EN	Allow 0–10 additional Shazam attempts for no-matches or pending consecutive confirmation. Errors are not retried. Default: 1.
+
+PLUGIN_SHAZAMCAPTURE_CONSECUTIVE_CONFIRMATIONS
+	EN	Consecutive confirmations required
+
+PLUGIN_SHAZAMCAPTURE_CONSECUTIVE_CONFIRMATIONS_DESC
+	EN	Require the same Shazam result 1–11 times in a row before showing or saving it as a valid match. A value of 1 disables confirmation. Confirmation attempts use the existing retry count and delay. Default: 1.
+
+PLUGIN_SHAZAMCAPTURE_RETRY_SAMPLE_SECONDS
+	EN	Retry sample length (seconds)
+
+PLUGIN_SHAZAMCAPTURE_RETRY_SAMPLE_SECONDS_DESC
+	EN	Analyze the newest 5–30 seconds of buffered audio on each retry. Default: 10.
+
+PLUGIN_SHAZAMCAPTURE_RETRY_DELAY_SECONDS
+	EN	Delay between retries (seconds)
+
+PLUGIN_SHAZAMCAPTURE_RETRY_DELAY_SECONDS_DESC
+	EN	Wait 1–30 seconds before each retry so newer audio can enter the buffer. Default: 5.
+
+PLUGIN_SHAZAMCAPTURE_PLAYER_SETTINGS_EMPTY
+	EN	There are no configurable settings for this player yet.

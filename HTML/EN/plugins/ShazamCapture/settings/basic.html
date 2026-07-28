@@ -1,0 +1,101 @@
+[% PROCESS settings/header.html %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_SHOW_SPOTIFY_HISTORY" desc="PLUGIN_SHAZAMCAPTURE_SHOW_SPOTIFY_HISTORY_DESC" %]
+		<input type="checkbox"
+			name="pref_showSpotifyInHistory"
+			id="showSpotifyInHistory"
+			value="1"
+			[% IF prefs.showSpotifyInHistory %]checked="checked"[% END %]
+		/>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_FLUSH_SAME_STREAM_METADATA" desc="PLUGIN_SHAZAMCAPTURE_FLUSH_SAME_STREAM_METADATA_DESC" %]
+		<input type="checkbox"
+			name="pref_flushOnSameStreamMetadata"
+			id="flushOnSameStreamMetadata"
+			value="1"
+			[% IF prefs.flushOnSameStreamMetadata %]checked="checked"[% END %]
+		/>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_SAVE_DEBUG_WAV" desc="PLUGIN_SHAZAMCAPTURE_SAVE_DEBUG_WAV_DESC" %]
+		<input type="checkbox"
+			name="pref_saveDebugWav"
+			id="saveDebugWav"
+			value="1"
+			[% IF prefs.saveDebugWav %]checked="checked"[% END %]
+		/>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_RECOGNITION" desc="PLUGIN_SHAZAMCAPTURE_AUTO_RECOGNITION_DESC" %]
+		<input type="checkbox"
+			name="pref_autoRecognition"
+			id="autoRecognition"
+			value="1"
+			[% IF prefs.autoRecognition %]checked="checked"[% END %]
+		/>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_METADATA_OVERLAY" desc="PLUGIN_SHAZAMCAPTURE_AUTO_METADATA_OVERLAY_DESC" %]
+		<input type="checkbox"
+			name="pref_autoMetadataOverlay"
+			id="autoMetadataOverlay"
+			value="1"
+			[% IF prefs.autoMetadataOverlay %]checked="checked"[% END %]
+		/>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS" desc="PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS_DESC" %]
+		<input type="text" class="stdedit"
+			name="pref_autoIgnoredStations" id="autoIgnoredStations"
+			value="[% prefs.autoIgnoredStations | html %]" size="60" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_COOLDOWN_SECONDS" desc="PLUGIN_SHAZAMCAPTURE_AUTO_COOLDOWN_SECONDS_DESC" %]
+		<input type="text" class="stdedit sliderInput_30_900_30"
+			name="pref_autoCooldownSeconds" id="autoCooldownSeconds"
+			value="[% prefs.autoCooldownSeconds | html %]" size="4" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_MODE" desc="PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_MODE_DESC" %]
+		<select name="pref_manualSampleMode" id="manualSampleMode">
+			<option value="buffered" [% IF prefs.manualSampleMode != "fresh" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_BUFFERED" | string %]
+			</option>
+			<option value="fresh" [% IF prefs.manualSampleMode == "fresh" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_MANUAL_SAMPLE_FRESH" | string %]
+			</option>
+		</select>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_SAMPLE_SECONDS" desc="PLUGIN_SHAZAMCAPTURE_SAMPLE_SECONDS_DESC" %]
+		<input type="text" class="stdedit sliderInput_5_30_1"
+			name="pref_sampleSeconds" id="sampleSeconds"
+			value="[% prefs.sampleSeconds | html %]" size="3" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_RETRY_COUNT" desc="PLUGIN_SHAZAMCAPTURE_RETRY_COUNT_DESC" %]
+		<input type="text" class="stdedit sliderInput_0_10_1"
+			name="pref_retryCount" id="retryCount"
+			value="[% prefs.retryCount | html %]" size="3" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_CONSECUTIVE_CONFIRMATIONS" desc="PLUGIN_SHAZAMCAPTURE_CONSECUTIVE_CONFIRMATIONS_DESC" %]
+		<input type="text" class="stdedit sliderInput_1_11_1"
+			name="pref_consecutiveConfirmations" id="consecutiveConfirmations"
+			value="[% prefs.consecutiveConfirmations | html %]" size="3" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_RETRY_SAMPLE_SECONDS" desc="PLUGIN_SHAZAMCAPTURE_RETRY_SAMPLE_SECONDS_DESC" %]
+		<input type="text" class="stdedit sliderInput_5_30_1"
+			name="pref_retrySampleSeconds" id="retrySampleSeconds"
+			value="[% prefs.retrySampleSeconds | html %]" size="3" />
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_RETRY_DELAY_SECONDS" desc="PLUGIN_SHAZAMCAPTURE_RETRY_DELAY_SECONDS_DESC" %]
+		<input type="text" class="stdedit sliderInput_1_30_1"
+			name="pref_retryDelaySeconds" id="retryDelaySeconds"
+			value="[% prefs.retryDelaySeconds | html %]" size="3" />
+	[% END %]
+
+[% PROCESS settings/footer.html %]

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extensions>
+  <id>3782dd34-7290-4fba-97e5-d0764e86863c</id>
+  <module>Plugins::ShazamCapture::Plugin</module>
+  <description>PLUGIN_SHAZAMCAPTURE_DESC</description>
+  <creator>Codex proof of concept</creator>
+  <version>0.1.0</version>
+  <defaultState>enabled</defaultState>
+  <type>2</type>
+  <targetApplication>
+    <minVersion>9.1.0</minVersion>
+    <maxVersion>9.1.*</maxVersion>
+    <id>SlimServer</id>
+  </targetApplication>
+  <name>PLUGIN_SHAZAMCAPTURE</name>
+</extensions>

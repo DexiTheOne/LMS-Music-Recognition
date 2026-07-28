@@ -1,0 +1,104 @@
+# Shazam Capture (milestone 1)
+
+Diagnostic LMS 9.1.0 plugin which copies bytes already being proxied to the
+original physical player. It never opens the source URL, changes player
+preferences, joins sync groups, or controls playback.
+
+CLI:
+
+    <playerid> shazamcapture status
+    <playerid> shazamcapture reset
+    <playerid> shazamcapture dump
+    <playerid> shazamcapture recognize
+    <playerid> shazamcapture history
+
+`recognize` returns immediately with `started: 1`; poll `status` for
+`worker_running` and `last_result`.
+
+The global settings page controls the manual identification sample mode,
+initial sample length, number of additional attempts, consecutive match
+confirmations, retry sample length, and delay between retries. A confirmation
+value of 1 accepts the first match; higher values require the same Shazam result
+on that many consecutive attempts within the configured retry budget.
+**Buffered sample** uses recent PCM and
+waits if necessary until the configured initial duration is available.
+**Fresh sample** clears only the PCM ring after a request is accepted, waits
+for the same configured duration, and then analyzes it.
+FFmpeg and capture continue normally in both modes. Every retry uses the newest
+configured slice of the fixed 30-second PCM ring. A no-match reaches the UI
+only after all configured retries have been exhausted; worker errors are not
+retried.
+
+Successful recognitions are appended to the plugin-local SQLite database at
+`var/history.sqlite3`. Each row includes the player, radio source, recognition
+time, playback plugin/technical source, song metadata, Apple Music, Spotify,
+and Shazam links, and a remote artwork URL.
+No-match and failed attempts remain in LMS logs and are not stored. An
+immediately repeated match on the same player is suppressed for ten minutes;
+the same song recognized later is retained as a new event. The plugin does not
+expose a history deletion command. Use `limit` and `offset` parameters with the
+`history` command to page through results; the maximum page size is 500.
+Recognition artwork is not stored locally. Recognition audio is not stored
+unless the global debug WAV setting is enabled.
+
+Optional automatic recognition is limited to LMS Radio and `hlspl` sources.
+Each physical player has an independent recognition cycle and cooldown. Plugin
+sources such as Spotty are excluded. A comma-separated station ignore list can
+disable automatic sampling by LMS station name. When the separate metadata
+overlay option is enabled, successful automatic samples temporarily replace
+the radio title, artist, album, and artwork; manual samples never publish an
+overlay.
+
+The LMS **My Apps** menu includes **Shazam History**. It lists successful
+matches newest first; selecting a song opens its full metadata, source, player,
+time, sample type, and external links. Missing artwork uses LMS's default cover image, and
+missing Spotify results are labeled **No Spotify Link Returned**.
+
+Apple Music and Spotify URLs are normalized before storage. Tracking query
+parameters and fragments are removed; Spotify app and intent links are
+converted to clickable `https://open.spotify.com/track/...` URLs.
+
+## UI
+
+The selected track/player **More** menu includes **Recognize Song**. It is a
+terminal action, not a submenu. **Identification in progress** is followed by
+the match, **No song found**, or an error and remains visible until then.
+
+Jive receives multi-line `popupplay` messages. Material Skin receives native
+notifications with matches formatted as `Title — Artist — Album`. Traditional
+players receive the same progress and result through their line display.
+
+## Settings
+
+LMS exposes a global **Shazam Capture** page under plugin settings and a
+**Shazam Capture** page under each player's settings. The global page includes
+**Show Spotify information in Shazam History**, enabled by default. Disabling
+it hides both Spotify links and the missing-link message from history detail
+pages without changing recognition, URL normalization, or database storage. It
+It also offers a default-off **Save recognition audio for debugging** option.
+When enabled, every exact normalized WAV submitted to Shazam is retained in
+`var/dumps`, named from the returned title (or `NoResult`) and local date/time.
+These files are retained until manually deleted. The page also configures
+buffered/fresh manual sampling, initial and retry sample lengths, no-match
+retry count, and retry delay. Numeric settings use LMS's
+native enhanced slider convention
+(`stdedit sliderInput_MIN_MAX_STEP`) rather than browser-native number inputs,
+so future numeric settings should follow the same pattern. The per-player page
+remains an informational placeholder.
+
+## Dependencies
+
+Dependencies are installed in the plugin-local environment. The
+`imageio-ffmpeg` package supplies a plugin-local FFmpeg binary. An explicit
+`SHAZAMCAPTURE_FFMPEG` service environment value can override it.
+
+    /opt/homebrew/bin/python3.12 -m venv "python/venv"
+    "python/venv/bin/pip" install -r "python/requirements.txt"
+
+Encoded dumps are disabled in code by default. They contain copyrighted audio
+and must be enabled deliberately for development.
+
+Python 3.12 is intentional: the native `shazamio-core` build currently crashes
+when imported under the installed Python 3.14 runtime.
+
+See `docs/TECHNICAL-NOTE.md` for the verified interception path and limitations.
