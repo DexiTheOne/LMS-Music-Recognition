@@ -64,7 +64,9 @@ is available:
 - `Settings.pm` provides the server-wide plugin settings page and persists the
   history display, same-stream metadata, sample duration, retry count, retry sample
   duration, retry delay, automatic recognition, overlay, station ignore list,
-  and automatic cooldown preferences in `plugin.shazamcapture`.
+  automatic cooldown, and active history database preferences in
+  `plugin.shazamcapture`. It also handles independent database selection,
+  backup, and guarded clear actions outside the ordinary preference-save path.
 - `PlayerSettings.pm` uses `needsClient` to provide the per-player page.
 
 Recognition defaults to a 10-second initial sample, one additional attempt, one
@@ -102,8 +104,9 @@ per-player page remains an informational placeholder.
 
 ## Recognition history and URL normalization
 
-Only successful matches are appended to `var/history.sqlite3`; no-match and
-failed attempts remain in LMS logs. Each event records player identity, radio
+Only successful matches are appended to the active direct `var/*.sqlite3`
+database, defaulting to `var/history.sqlite3`; no-match and failed attempts
+remain in LMS logs. Each event records player identity, radio
 station, technical playback source, localizable timestamp, normalized song
 metadata, and the external URLs returned by Shazam. An identical consecutive
 match on the same player is suppressed for ten minutes, while later
@@ -118,6 +121,15 @@ Material Skin can open them.
 History stores `trigger_method` as `auto` or `manual`; detail pages render
 those stable values as **Auto Sample** and **Manual Sample**. Additive
 migration marks all rows created before this field existed as manual.
+
+The global settings page lists only validated `.sqlite3` files directly under
+`var`, can create and switch to a new database, and keeps the previous
+connection active if a selection cannot be opened and migrated. Backups use
+DBD::SQLite's online-backup API so committed WAL content is included, run an
+integrity check, finalize as a standalone SQLite file, and are stored under
+`var/backups`. Clearing is refused unless that backup succeeds and the
+confirmation control is submitted; it removes history rows and resets the
+table sequence without changing other databases or plugin preferences.
 
 `Auto.pm` owns independent per-player timers for Radio and `hlspl` sources,
 applies the station ignore list, starts fresh automatic recognition cycles,

@@ -7,13 +7,15 @@ python/venv/
 *.py[cod]
 
 # Plugin runtime state and recognition evidence
-var/history.sqlite3
-var/history.sqlite3-*
+var/*.sqlite3
+var/*.sqlite3-*
+var/backups/*
 var/tmp/*
 var/dumps/*
 var/logs/*
 
 # Preserve runtime directory structure
+!var/backups/.gitkeep
 !var/tmp/.gitkeep
 !var/dumps/.gitkeep
 !var/logs/.gitkeep

@@ -3,17 +3,42 @@ package Plugins::ShazamCapture::History;
 use strict;
 use DBI;
 use JSON::XS;
+use File::Basename qw(basename);
+use File::Path qw(make_path);
 use File::Spec;
 use POSIX qw(strftime);
 
 my $dbh;
 my $path;
+my $root;
 
 sub init {
-	my ($root) = @_;
-	$path = File::Spec->catfile($root, 'var', 'history.sqlite3');
-	$dbh = DBI->connect(
-		"dbi:SQLite:dbname=$path", '', '',
+	my ($plugin_root, $filename) = @_;
+	$root = $plugin_root;
+	return select_database($filename || 'history.sqlite3', 1);
+}
+
+sub _valid_filename {
+	my ($filename) = @_;
+	return unless defined $filename;
+	return $filename
+		if $filename =~ /\A[A-Za-z0-9][A-Za-z0-9._-]*\.sqlite3\z/
+			&& basename($filename) eq $filename;
+	return;
+}
+
+sub _database_path {
+	my ($filename) = @_;
+	die 'recognition history is not initialized' unless $root;
+	$filename = _valid_filename($filename)
+		or die 'Database filename must end in .sqlite3 and contain only letters, numbers, dots, dashes, or underscores';
+	return File::Spec->catfile($root, 'var', $filename);
+}
+
+sub _connect {
+	my ($database_path) = @_;
+	my $handle = DBI->connect(
+		"dbi:SQLite:dbname=$database_path", '', '',
 		{
 			RaiseError     => 1,
 			PrintError     => 0,
@@ -21,8 +46,12 @@ sub init {
 			sqlite_unicode => 1,
 		}
 	);
-	$dbh->do('PRAGMA journal_mode = WAL');
-	$dbh->do('PRAGMA synchronous = NORMAL');
+	$handle->do('PRAGMA journal_mode = WAL');
+	$handle->do('PRAGMA synchronous = NORMAL');
+	return $handle;
+}
+
+sub _initialize_schema {
 	$dbh->do(<<'SQL');
 CREATE TABLE IF NOT EXISTS recognition_history (
 	id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +87,93 @@ SQL
 		. "WHERE trigger_method IS NULL OR trigger_method=''");
 	_clean_stored_apple_urls();
 	_clean_stored_spotify_urls();
+}
+
+sub select_database {
+	my ($filename, $create) = @_;
+	my $new_path = _database_path($filename);
+	die "Database file does not exist: $filename" unless $create || -f $new_path;
+	my $new_dbh = _connect($new_path);
+	my $old_dbh = $dbh;
+	$dbh = $new_dbh;
+	eval { _initialize_schema() };
+	if ($@) {
+		my $error = $@;
+		eval { $new_dbh->disconnect };
+		$dbh = $old_dbh;
+		die $error;
+	}
+	$path = $new_path;
+	eval { $old_dbh->disconnect } if $old_dbh;
 	return 1;
+}
+
+sub databases {
+	return [] unless $root;
+	my $var = File::Spec->catdir($root, 'var');
+	opendir my $dir, $var or return [];
+	my @files = sort grep {
+		_valid_filename($_) && -f File::Spec->catfile($var, $_)
+	} readdir $dir;
+	closedir $dir;
+	return \@files;
+}
+
+sub active_database {
+	return $path ? basename($path) : 'history.sqlite3';
+}
+
+sub backup {
+	die 'recognition history is not initialized' unless $dbh && $path && $root;
+	my $directory = File::Spec->catdir($root, 'var', 'backups');
+	make_path($directory);
+	my $stem = active_database();
+	$stem =~ s/\.sqlite3\z//;
+	my $timestamp = strftime('%Y%m%d-%H%M%S', localtime());
+	my $filename = "$stem-$timestamp.sqlite3";
+	my $backup_path = File::Spec->catfile($directory, $filename);
+	my $suffix = 1;
+	while (-e $backup_path) {
+		$filename = "$stem-$timestamp-$suffix.sqlite3";
+		$backup_path = File::Spec->catfile($directory, $filename);
+		$suffix++;
+	}
+	eval {
+		$dbh->sqlite_backup_to_file($backup_path);
+		my $verify = DBI->connect(
+			"dbi:SQLite:dbname=$backup_path", '', '',
+			{ RaiseError => 1, PrintError => 0 }
+		);
+		$verify->do('PRAGMA journal_mode = DELETE');
+		my ($integrity) = $verify->selectrow_array('PRAGMA integrity_check');
+		$verify->disconnect;
+		die 'Backup verification failed'
+			unless defined $integrity && $integrity eq 'ok';
+	};
+	if ($@) {
+		my $error = $@;
+		unlink $_ for $backup_path, "$backup_path-wal", "$backup_path-shm";
+		die $error;
+	}
+	return $backup_path;
+}
+
+sub backup_and_clear {
+	my $backup_path = backup();
+	$dbh->begin_work;
+	eval {
+		$dbh->do('DELETE FROM recognition_history');
+		$dbh->do("DELETE FROM sqlite_sequence WHERE name='recognition_history'");
+		$dbh->commit;
+	};
+	if ($@) {
+		my $error = $@;
+		eval { $dbh->rollback };
+		die $error;
+	}
+	$dbh->do('PRAGMA wal_checkpoint(TRUNCATE)');
+	$dbh->do('VACUUM');
+	return $backup_path;
 }
 
 sub _add_column {

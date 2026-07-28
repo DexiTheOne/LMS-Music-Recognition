@@ -107,6 +107,7 @@ Music Detect/
 │   ├── requirements.txt
 │   └── venv/
 ├── var/
+│   ├── backups/
 │   ├── tmp/
 │   ├── dumps/
 │   └── logs/
@@ -139,9 +140,10 @@ Do not move the Perl modules to the project root. LMS resolves
   metadata is stable for two seconds. Empty and unchanged metadata are ignored.
 - `Worker.pm`: forks an external Python worker and polls it asynchronously with
   LMS timers. The LMS event loop never waits for FFmpeg or the network.
-- `History.pm`: appends successful matches to plugin-local SQLite storage,
-  suppresses immediate same-player duplicates, migrates additive columns, and
-  canonicalizes stored Apple Music and Spotify URLs.
+- `History.pm`: appends successful matches to selectable plugin-local SQLite
+  storage, suppresses immediate same-player duplicates, migrates additive
+  columns, canonicalizes stored Apple Music and Spotify URLs, and provides
+  verified online backups plus backup-before-clear management.
 - `HistoryUI.pm`: exposes **Shazam History** as an LMS app with song rows,
   remote artwork or LMS's default cover, complete metadata, and clickable
   external links. The global `showSpotifyInHistory` preference suppresses only
@@ -316,9 +318,9 @@ Recognition completion is logged as a redacted JSON summary. Never log raw
 audio, cookies, authentication headers, signed query parameters, or complete
 service responses. Redact URL query strings.
 
-Runtime artifacts must stay under `var/tmp`, `var/dumps`, and `var/logs`.
-Snapshots and worker outputs are normally deleted after completion. Encoded
-dumps are disabled by default.
+Runtime artifacts must stay under `var/backups`, `var/tmp`, `var/dumps`, and
+`var/logs`. Snapshots and worker outputs are normally deleted after completion.
+Encoded dumps are disabled by default.
 
 ## Useful development tools
 

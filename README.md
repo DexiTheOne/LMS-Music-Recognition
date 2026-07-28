@@ -29,15 +29,16 @@ configured slice of the fixed 30-second PCM ring. A no-match reaches the UI
 only after all configured retries have been exhausted; worker errors are not
 retried.
 
-Successful recognitions are appended to the plugin-local SQLite database at
-`var/history.sqlite3`. Each row includes the player, radio source, recognition
+Successful recognitions are appended to the selected plugin-local SQLite
+database in `var`; `var/history.sqlite3` is the default. Each row includes the
+player, radio source, recognition
 time, playback plugin/technical source, song metadata, Apple Music, Spotify,
 and Shazam links, and a remote artwork URL.
 No-match and failed attempts remain in LMS logs and are not stored. An
 immediately repeated match on the same player is suppressed for ten minutes;
-the same song recognized later is retained as a new event. The plugin does not
-expose a history deletion command. Use `limit` and `offset` parameters with the
-`history` command to page through results; the maximum page size is 500.
+the same song recognized later is retained as a new event. Use `limit` and
+`offset` parameters with the `history` command to page through results; the
+maximum page size is 500.
 Recognition artwork is not stored locally. Recognition audio is not stored
 unless the global debug WAV setting is enabled.
 
@@ -84,9 +85,12 @@ pages without changing recognition, URL normalization, or database storage. It
 It also offers a default-off **Save recognition audio for debugging** option.
 When enabled, every exact normalized WAV submitted to Shazam is retained in
 `var/dumps`, named from the returned title (or `NoResult`) and local date/time.
-These files are retained until manually deleted. The page also configures
-buffered/fresh manual sampling, initial and retry sample lengths, no-match
-retry count, and retry delay. Numeric settings use LMS's
+These files are retained until manually deleted. The page can also select or
+create a direct `var/*.sqlite3` history database, create a verified timestamped
+snapshot in `var/backups`, and back up then clear every recognition from the
+active database. Backups and SQLite sidecar files are not selectable. The page
+also configures buffered/fresh manual sampling, initial and retry sample
+lengths, no-match retry count, and retry delay. Numeric settings use LMS's
 native enhanced slider convention
 (`stdedit sliderInput_MIN_MAX_STEP`) rather than browser-native number inputs,
 so future numeric settings should follow the same pattern. The per-player page

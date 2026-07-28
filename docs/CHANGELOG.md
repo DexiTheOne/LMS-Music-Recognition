@@ -1,5 +1,19 @@
 # Changelog and failure history
 
+## 2026-07-28 — History database management
+
+- Added a global-settings database selector for existing direct
+  `var/*.sqlite3` files plus a guarded new-database name field. Invalid,
+  missing, or non-SQLite selections leave the current connection active.
+- Persisted the active database filename with `history.sqlite3` as the startup
+  fallback. Backups and SQLite WAL/SHM sidecars never appear in the selector.
+- Added an online SQLite backup action that captures committed WAL content,
+  verifies database integrity, and writes a standalone timestamped snapshot
+  beneath `var/backups`.
+- Added a confirmation-gated **Back up and clear database** action. Clearing
+  aborts unless its backup succeeds, removes only the active database's
+  recognition rows, resets its sequence, checkpoints WAL, and vacuums it.
+
 ## 2026-07-28 — Jive inline recognition progress
 
 - Split successful Jive child-window results into three inert rows ordered as

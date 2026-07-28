@@ -1,5 +1,44 @@
 [% PROCESS settings/header.html %]
 
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_DATABASE" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_DATABASE_DESC" %]
+		<select name="databaseSelection" id="databaseSelection"
+			onchange="document.getElementById('newDatabaseName').disabled=(this.value!='__new__');">
+			[% FOREACH database IN historyDatabases %]
+				<option value="[% database | html %]"
+					[% IF database == activeHistoryDatabase %]selected="selected"[% END %]>
+					[% database | html %]
+				</option>
+			[% END %]
+			<option value="__new__">[% "PLUGIN_SHAZAMCAPTURE_NEW_DATABASE" | string %]</option>
+		</select>
+		<input type="text" class="stdedit" name="newDatabaseName" id="newDatabaseName"
+			placeholder="history-2.sqlite3" disabled="disabled" size="28" />
+		<button type="submit" name="databaseAction" value="select">
+			[% "PLUGIN_SHAZAMCAPTURE_USE_DATABASE" | string %]
+		</button>
+		<div>
+			[% "PLUGIN_SHAZAMCAPTURE_ACTIVE_DATABASE" | string %]:
+			<strong>[% activeHistoryDatabase | html %]</strong>
+			([% historyDatabaseCount %] [% "PLUGIN_SHAZAMCAPTURE_DATABASE_ENTRIES" | string %])
+		</div>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_DATABASE_BACKUP" desc="PLUGIN_SHAZAMCAPTURE_DATABASE_BACKUP_DESC" %]
+		<button type="submit" name="databaseAction" value="backup">
+			[% "PLUGIN_SHAZAMCAPTURE_CREATE_BACKUP" | string %]
+		</button>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR" desc="PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR_DESC" %]
+		<label>
+			<input type="checkbox" name="clearDatabaseConfirmed" value="1" />
+			[% "PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR_CONFIRM" | string %]
+		</label>
+		<button type="submit" name="databaseAction" value="clear">
+			[% "PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR_BUTTON" | string %]
+		</button>
+	[% END %]
+
 	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_SHOW_SPOTIFY_HISTORY" desc="PLUGIN_SHAZAMCAPTURE_SHOW_SPOTIFY_HISTORY_DESC" %]
 		<input type="checkbox"
 			name="pref_showSpotifyInHistory"

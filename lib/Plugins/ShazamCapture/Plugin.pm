@@ -68,9 +68,23 @@ sub initPlugin {
 		autoMetadataOverlay => 0,
 		autoIgnoredStations => '',
 		autoCooldownSeconds => 120,
+		historyDatabase => 'history.sqlite3',
 	});
-	eval { Plugins::ShazamCapture::History::init($root) };
-	$log->error("recognition history unavailable: $@") if $@;
+	my $history_database = $prefs->get('historyDatabase') || 'history.sqlite3';
+	eval {
+		Plugins::ShazamCapture::History::init(
+			$root, $history_database
+		)
+	};
+	if ($@) {
+		my $error = $@;
+		$log->error("recognition history database $history_database unavailable: $error");
+		eval {
+			Plugins::ShazamCapture::History::init($root, 'history.sqlite3');
+			$prefs->set('historyDatabase', 'history.sqlite3');
+		};
+		$log->error("default recognition history unavailable: $@") if $@;
+	}
 	eval { Plugins::ShazamCapture::Hook::install() };
 	$log->error("hook unavailable: $@") if $@;
 	Slim::Control::Request::addDispatch(['shazamcapture','_cmd'], [1, 0, 1, \&command]);

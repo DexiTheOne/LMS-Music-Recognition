@@ -193,6 +193,25 @@ SqueezePlay may also rebuild TrackInfo using an internal source-less request
 with `menu=track`. That row must log `origin=auto` and
 `nextWindow=<child>`; never infer Material from the named menu mode alone.
 
+## History database management
+
+On the global **Shazam Capture** settings page:
+
+1. Select **New database…**, enter `settings-test.sqlite3`, and choose
+   **Use database**. Confirm it becomes active and appears in the selector.
+2. Choose **Create backup**. Confirm the status names one standalone
+   `var/backups/settings-test-*.sqlite3` file with no matching `-wal` or
+   `-shm` file.
+3. Add or recognize a history entry, select the clear confirmation, and choose
+   **Back up and clear database**. Confirm Shazam History is empty and another
+   verified backup was reported.
+4. Switch back to `history.sqlite3`. Confirm its previous history is unchanged.
+5. Attempt a new name containing `/` or `..`. Confirm the operation is rejected
+   and the previously active database remains selected.
+
+Preserve the generated database and backup evidence unless the user explicitly
+requests its removal.
+
 ## Dependency checks
 
 From the project root:

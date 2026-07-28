@@ -37,6 +37,60 @@ PLUGIN_SHAZAMCAPTURE_PLAYER_SETTINGS
 PLUGIN_SHAZAMCAPTURE_SETTINGS_EMPTY
 	EN	There are no configurable plugin settings yet.
 
+PLUGIN_SHAZAMCAPTURE_HISTORY_DATABASE
+	EN	History database
+
+PLUGIN_SHAZAMCAPTURE_HISTORY_DATABASE_DESC
+	EN	Select an existing SQLite database from the plugin var directory, or create a new one. The active database is used for new recognition results and Shazam History.
+
+PLUGIN_SHAZAMCAPTURE_NEW_DATABASE
+	EN	New database...
+
+PLUGIN_SHAZAMCAPTURE_USE_DATABASE
+	EN	Use database
+
+PLUGIN_SHAZAMCAPTURE_ACTIVE_DATABASE
+	EN	Active database
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_ENTRIES
+	EN	entries
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_BACKUP
+	EN	Back up history
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_BACKUP_DESC
+	EN	Create a consistent timestamped copy of the active database in var/backups.
+
+PLUGIN_SHAZAMCAPTURE_CREATE_BACKUP
+	EN	Create backup
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR
+	EN	Clear history database
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR_DESC
+	EN	Create and verify a backup, then permanently remove every recognition entry from the active database. Other databases and plugin settings are unaffected.
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR_CONFIRM
+	EN	I understand that all entries in the active database will be removed.
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_CLEAR_BUTTON
+	EN	Back up and clear database
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_SELECTED
+	EN	History database selected: %s
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_BACKED_UP
+	EN	Database backup created: var/backups/%s
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_CLEARED
+	EN	Database cleared after creating backup: var/backups/%s
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_CONFIRM_REQUIRED
+	EN	Confirm that you want to clear the active database.
+
+PLUGIN_SHAZAMCAPTURE_DATABASE_ACTION_FAILED
+	EN	Database operation failed: %s
+
 PLUGIN_SHAZAMCAPTURE_SHOW_SPOTIFY_HISTORY
 	EN	Show Spotify information in Shazam History
 
