@@ -227,12 +227,49 @@ sub _result_message {
 		$result->{ok} && $result->{matched} &&
 		$result->{track} && ref $result->{track} eq 'HASH'
 	) {
-		return join(' — ', grep { defined $_ && length $_ } @{$result->{track}}{qw(title artist album)});
+		my @fields = map { _plain_text($_) }
+			@{$result->{track}}{qw(title artist album)};
+		return join(' - ', grep { length $_ } @fields);
 	}
-	return $client->string('PLUGIN_SHAZAMCAPTURE_NO_MATCH')
+	return _plain_text($client->string('PLUGIN_SHAZAMCAPTURE_NO_MATCH'))
 		if $result->{ok} && !$result->{matched};
-	return $client->string('PLUGIN_SHAZAMCAPTURE_ERROR')
-		. ': ' . ($result->{error} || 'Unknown error');
+	return _plain_text(
+		$client->string('PLUGIN_SHAZAMCAPTURE_ERROR')
+		. ': ' . ($result->{error} || 'Unknown error')
+	);
+}
+
+sub _plain_text {
+	my ($value) = @_;
+	return '' unless defined $value;
+
+	my $text = "$value";
+	# Material renders result rows in an escaped snackbar. Remove markup here
+	# so HTML-bearing metadata cannot appear as literal tags in that popup.
+	$text =~ s/&#x([0-9a-f]+);/_entity_chr(hex($1))/gei;
+	$text =~ s/&#([0-9]+);/_entity_chr($1)/ge;
+	$text =~ s/&nbsp;/ /gi;
+	$text =~ s/&amp;/&/gi;
+	$text =~ s/&quot;/"/gi;
+	$text =~ s/&#39;/'/gi;
+	$text =~ s/&lt;/</gi;
+	$text =~ s/&gt;/>/gi;
+	$text =~ s{<(?:br|hr)\b[^>]*>} { }gi;
+	$text =~ s{</(?:div|p|h[1-6]|li|tr|td|th)\s*>} { }gi;
+	$text =~ s{<[^>]*>}{}g;
+	$text =~ s/[\x00-\x1f\x7f]+/ /g;
+	$text =~ s/\s+/ /g;
+	$text =~ s/^\s+|\s+$//g;
+	return $text;
+}
+
+sub _entity_chr {
+	my ($codepoint) = @_;
+	return '' unless defined $codepoint
+		&& $codepoint > 0
+		&& $codepoint <= 0x10ffff
+		&& !($codepoint >= 0xd800 && $codepoint <= 0xdfff);
+	return chr($codepoint);
 }
 
 sub _notify_material_result {

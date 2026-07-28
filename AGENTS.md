@@ -235,7 +235,7 @@ Jive and Material Skin:
 - Material timeout values are seconds. Jive's payload duration is
   milliseconds; the outer `showBriefly` duration is seconds.
 - Jive accepts multiple lines. Material is single-line; format matches as
-  `Title — Artist — Album`.
+  `Title - Artist - Album`.
 - Target Material notifications with the selected physical player's ID.
 
 Known traps:

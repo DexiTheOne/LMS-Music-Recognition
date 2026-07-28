@@ -11,6 +11,11 @@
   deadline. It completes the pending action with an error and cancels a
   stranded manual recognition, preventing an endless inline wheel even if the
   normal recognition callback path faults.
+- Sanitized recognition popup text before returning it to control UIs. HTML
+  markup, entities, control characters, and repeated whitespace are normalized
+  to plain text so Material does not display literal tags.
+- Replaced the UTF-8 em-dash separator with an ASCII hyphen, avoiding mojibake
+  in LMS UI paths which do not consistently preserve Perl source encoding.
 
 ## 2026-07-27 — Optional confirmation bypass after two no-matches
 
