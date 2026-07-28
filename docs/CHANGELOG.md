@@ -34,6 +34,11 @@
   either level, while JSON-RPC always receives action-level
   `parentNoRefresh`. This remains correct even when the feed was built or
   cached without the initiating request transport.
+- Stopped treating a source-less `menu=track` request as Material. SqueezePlay
+  can rebuild TrackInfo through exactly that internal request shape. Such
+  control rows now remain navigation-neutral; only explicit JSON-RPC receives
+  `parentNoRefresh`, and only a request without control-menu mode receives the
+  traditional-button row-level `parent`.
 - Made traditional-button completion authoritative before Material routing.
   SB2 results now always schedule the native two-line `showBriefly` display,
   even when TrackInfo's menu-mode hint resembles a Material request.

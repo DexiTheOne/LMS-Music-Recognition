@@ -188,6 +188,10 @@ source contains `SqueezePlay` and whose `nextWindow` is `<child>`. Material's
 serialized row must show `origin=material` and
 `nextWindow=parentNoRefresh`.
 
+SqueezePlay may also rebuild TrackInfo using an internal source-less request
+with `menu=track`. That row must log `origin=auto` and
+`nextWindow=<child>`; never infer Material from the named menu mode alone.
+
 ## Dependency checks
 
 From the project root:

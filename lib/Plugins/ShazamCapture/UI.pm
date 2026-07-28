@@ -122,8 +122,10 @@ sub track_info_item {
 	my $request_origin = $active_request
 		? _transport_origin($active_request->source)
 		: undef;
-	my $origin = $request_origin
-		|| ($is_material ? 'material' : 'auto');
+	# A source-less request is not proof of Material. SqueezePlay can rebuild
+	# TrackInfo through an internal request with menu=track and no transport.
+	# Keep those rows neutral so neither UI receives destructive navigation.
+	my $origin = $request_origin || 'auto';
 	my $go_action = {
 		player => 0,
 		cmd    => ['shazamcaptureui', 'items'],
@@ -133,7 +135,7 @@ sub track_info_item {
 	# nextWindow: it locks this menu while the request is pending, then pushes
 	# the terminal result as a child window with a normal Back action.
 	$go_action->{nextWindow} = 'parentNoRefresh'
-		unless $origin eq 'jive';
+		if $origin eq 'material';
 	$log->info(
 		'UI TrackInfo row origin=' . $origin .
 		' transport=' . ($request_origin || '<none>') .
@@ -186,7 +188,8 @@ sub track_info_item {
 	# callback. Do not expose that fallback to Jive: SqueezePlay applies the
 	# item's top-level nextWindow when its go action omits one, which would
 	# close the More menu before the pending child request can show its wheel.
-	$item->{nextWindow} = 'parent' unless $origin eq 'jive';
+	$item->{nextWindow} = 'parent'
+		if !length($menu_mode);
 	return [$item];
 }
 

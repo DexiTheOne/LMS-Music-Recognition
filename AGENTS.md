@@ -244,6 +244,9 @@ Jive and Material Skin:
   final recognition-row navigation while XMLBrowser serializes the row for the
   concrete request. Remove action-level and row-level `nextWindow` for
   SqueezePlay/Comet; set action-level `parentNoRefresh` for JSON-RPC.
+- Treat source-less control-menu requests as transport-neutral even when their
+  named menu mode is `track`; SqueezePlay can use that shape internally. Only
+  explicit JSON-RPC is evidence for Material navigation metadata.
 - SB2 terminal matches use a traditional `line` display with artist on the
   small top line and title on the large bottom line.
 - Scope terminal delivery to the initiating path: SB2 receives only a line
