@@ -171,9 +171,16 @@ sub _complete_command {
 	if ($origin eq 'material') {
 		# Material keeps fetchingItem active while this list-shaped request is
 		# pending, then displays the sole text row through its native result
-		# popup. The response is scoped to the browser which initiated it.
+		# popup. Mark the response row as navigational so Material does not
+		# decorate a sole non-clickable text row with an HTML div before passing
+		# its title to the escaped snackbar. The clicked item's nextWindow still
+		# controls the actual navigation. The response remains scoped to the
+		# browser which initiated it.
 		$request->addResultLoop('item_loop', 0, 'text', $message);
 		$request->addResultLoop('item_loop', 0, 'type', 'text');
+		$request->addResultLoop(
+			'item_loop', 0, 'nextWindow', 'parentNoRefresh'
+		);
 		$request->setStatusDone();
 		return;
 	}

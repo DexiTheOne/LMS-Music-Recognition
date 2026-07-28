@@ -102,6 +102,8 @@ Client-specific acceptance criteria:
 - Material remains on the current page and shows its three-dot loader while
   recognition is pending.
 - The Material entry must be visible and clickable.
+- The Material terminal snackbar must contain only plain recognition text; it
+  must not expose `<div>`, `style`, or other HTML decoration.
 - Material match popup contains all three fields as
   `Title — Artist — Album`.
 - SB2 shows its block animation while waiting, then artist on the small top

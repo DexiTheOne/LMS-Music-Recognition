@@ -16,6 +16,10 @@
   to plain text so Material does not display literal tags.
 - Replaced the UTF-8 em-dash separator with an ASCII hyphen, avoiding mojibake
   in LMS UI paths which do not consistently preserve Perl source encoding.
+- Prevented Material Skin from wrapping the sole terminal text row in its
+  browse-page `<div style="...">` decoration before forwarding that row to the
+  escaped snackbar. The terminal row now carries inert navigation metadata,
+  while the initiating action continues to control the actual navigation.
 
 ## 2026-07-27 — Optional confirmation bypass after two no-matches
 

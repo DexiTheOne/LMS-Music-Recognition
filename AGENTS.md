@@ -197,7 +197,10 @@ Jive and Material Skin:
 - Use `parentNoRefresh` on the control/Jive `go` action so Material stays on
   the current view. Return the terminal message as the direct request's sole
   text row so Material displays that result—not the **Recognize Song** row
-  label—in its native popup. Leave the traditional-button row's top-level
+  label—in its native popup. Mark that response row with inert
+  `nextWindow => 'parentNoRefresh'` metadata to prevent Material from wrapping
+  a sole non-clickable text row in browse-page HTML before sending it to the
+  escaped snackbar. Leave the traditional-button row's top-level
   `nextWindow => 'parent'`.
 - The callback remains pending until recognition has a terminal result.
   Material displays its native three-dot loader during that wait.
