@@ -384,16 +384,44 @@ sub _view_database_path {
 	my ($relative_path) = @_;
 	$relative_path = '' unless defined $relative_path;
 	$relative_path =~ s/^\s+|\s+$//g;
-	die 'Enter a plugin-relative .sqlite3 database path'
-		unless length $relative_path
-			&& $relative_path =~ /\.sqlite3\z/i
-			&& !File::Spec->file_name_is_absolute($relative_path);
-	my @parts = File::Spec->splitdir($relative_path);
-	die 'Database path must stay inside the plugin directory'
-		if grep { !length($_) || $_ eq '.' || $_ eq '..' } @parts;
-	my $candidate = File::Spec->catfile($root, @parts);
-	die "Database file does not exist: $relative_path"
-		unless -f $candidate;
+	die 'Enter or select a plugin-contained .sqlite3 database path'
+		unless length $relative_path && $relative_path =~ /\.sqlite3\z/i;
+	return _confined_path($relative_path, 1);
+}
+
+sub normalize_view_database_path {
+	my ($database_path) = @_;
+	my (undef, $display_path) = _view_database_path($database_path);
+	return $display_path;
+}
+
+sub view_database_picker_path {
+	my ($database_path) = @_;
+	$database_path = File::Spec->catfile('var', 'backups', '')
+		unless defined $database_path && length $database_path;
+	my ($picker_path) = eval { _confined_path($database_path, 0) };
+	return $picker_path;
+}
+
+sub _confined_path {
+	my ($database_path, $file_only) = @_;
+	die 'recognition history is not initialized' unless $root;
+	$database_path = '' unless defined $database_path;
+	$database_path =~ s/^\s+|\s+$//g;
+	die 'Enter a database path' unless length $database_path;
+	my $candidate;
+	if (File::Spec->file_name_is_absolute($database_path)) {
+		$candidate = $database_path;
+	}
+	else {
+		my @parts = File::Spec->splitdir($database_path);
+		pop @parts while @parts && !length $parts[-1];
+		die 'Database path must stay inside the plugin directory'
+			if !@parts || grep { !length($_) || $_ eq '.' || $_ eq '..' } @parts;
+		$candidate = File::Spec->catfile($root, @parts);
+	}
+	die "Database file does not exist: $database_path"
+		unless $file_only ? -f $candidate : -e $candidate;
 	my $real_root = abs_path($root);
 	my $real_candidate = abs_path($candidate);
 	die 'Database path could not be resolved'
@@ -406,7 +434,8 @@ sub _view_database_path {
 	}
 	die 'Database path must stay inside the plugin directory'
 		unless index($compare_candidate, $compare_prefix) == 0;
-	return ($real_candidate, File::Spec->catfile(@parts));
+	my $display_path = File::Spec->abs2rel($real_candidate, $real_root);
+	return ($real_candidate, $display_path);
 }
 
 sub _all_matches_from_handle {

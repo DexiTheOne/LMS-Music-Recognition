@@ -58,8 +58,10 @@ case-insensitive text filter by station, stream source, artist, song title,
 album, or capture type, and choose chronological or alphabetical ordering.
 The per-player page can also point the view at a plugin-local `.sqlite3`
 snapshot, normally beneath `var/backups`; snapshots are opened strictly
-read-only while recognition continues writing to the active database. The
-active backup path, scope, filter, and sort appear above the history rows.
+read-only while recognition continues writing to the active database. The path
+field uses LMS's built-in file selector filtered to `.sqlite3` files. A valid
+absolute picker result is saved in plugin-relative form. The active backup
+path, scope, filter, and sort appear above the history rows.
 Selecting a song opens its full metadata, source, player, time, sample type,
 and external links. Missing artwork uses LMS's default cover image, and missing
 Spotify results are labeled **No Spotify Link Returned**.

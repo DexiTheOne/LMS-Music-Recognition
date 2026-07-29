@@ -11,7 +11,7 @@
 	[% END %]
 
 	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_VIEW_DATABASE_PATH" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_VIEW_DATABASE_PATH_DESC" %]
-		<input type="text" class="stdedit"
+		<input type="text" class="stdedit selectFile selectFile_sqlite3"
 			name="pref_historyViewDatabasePath"
 			id="historyViewDatabasePath"
 			value="[% IF prefs.historyViewDatabasePath %][% prefs.historyViewDatabasePath | html %][% ELSE %]var/backups/[% END %]"

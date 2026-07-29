@@ -69,7 +69,10 @@ is available:
   backup, and guarded clear actions outside the ordinary preference-save path.
 - `PlayerSettings.pm` uses `needsClient` and client-scoped plugin preferences
   to configure the history scope, text filter, sort order, and optional
-  plugin-relative read-only database view independently for each player.
+  plugin-relative read-only database view independently for each player. Its
+  `selectFile selectFile_sqlite3` classes invoke LMS's native file browser;
+  `beforeRender` supplies an absolute picker location, and the save handler
+  normalizes valid selections back to a portable relative path.
 
 Recognition defaults to a 10-second initial sample, one additional attempt, one
 required confirmation (the first match is accepted), a 10-second retry sample,

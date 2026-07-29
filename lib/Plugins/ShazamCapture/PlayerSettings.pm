@@ -3,6 +3,7 @@ package Plugins::ShazamCapture::PlayerSettings;
 use strict;
 use base qw(Slim::Web::Settings);
 use File::Spec;
+use Plugins::ShazamCapture::History;
 use Slim::Utils::Prefs;
 
 my $prefs = preferences('plugin.shazamcapture');
@@ -81,9 +82,27 @@ sub handler {
 		$database_path = substr($database_path, 0, 500);
 		$database_path = File::Spec->catfile('var', 'backups', '')
 			unless length $database_path;
+		my $normalized = eval {
+			Plugins::ShazamCapture::History::normalize_view_database_path(
+				$database_path
+			)
+		};
+		$database_path = $normalized if defined $normalized && length $normalized;
 		$params->{pref_historyViewDatabasePath} = $database_path;
 	}
 	return $class->SUPER::handler($client, $params, @args);
+}
+
+sub beforeRender {
+	my ($class, $params, $client) = @_;
+	my $saved = $prefs->client($client)->get('historyViewDatabasePath');
+	$saved = File::Spec->catfile('var', 'backups', '')
+		unless defined $saved && length $saved;
+	my $picker_path =
+		Plugins::ShazamCapture::History::view_database_picker_path($saved);
+	return unless defined $picker_path && length $picker_path;
+	$params->{prefs}->{historyViewDatabasePath} = $picker_path;
+	$params->{prefs}->{pref_historyViewDatabasePath} = $picker_path;
 }
 
 1;

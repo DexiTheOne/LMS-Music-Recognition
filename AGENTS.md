@@ -162,7 +162,9 @@ Do not move the Perl modules to the project root. LMS resolves
 - `PlayerSettings.pm`: registers client-scoped history display preferences:
   optional current-player scope, a whitelisted case-insensitive field filter,
   its text value, chronological or alphabetical sort order, and an optional
-  retained plugin-relative read-only database path.
+  retained plugin-relative read-only database path. The path input uses LMS's
+  native `selectFile selectFile_sqlite3` browser classes; absolute selections
+  inside the plugin are normalized back to plugin-relative storage.
 - `UI.pm`: adds **Recognize Song** to `Slim::Menu::TrackInfo` using LMS's
   native asynchronous callback pattern, leaves native loading animations
   visible, and routes terminal results only to the initiating UI path.

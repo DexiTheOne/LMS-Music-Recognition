@@ -49,31 +49,39 @@ web UI:
     database**, **Show only this player's history**, **Filter history by**,
     **Filter value**, and **Sort order** are present.
 14. Confirm **Use current history database** defaults on and disables the
-    database-path field, whose initial value is `var/backups/`.
-15. Uncheck it, enter a plugin-relative backup such as
+    database-path field, whose initial displayed value is the absolute
+    plugin-local `var/backups` directory.
+15. Confirm the database-path field has LMS's native file-selection button.
+    Open it and verify the dialog starts in the plugin's `var/backups`
+    directory and displays folders plus `.sqlite3` files, but not unrelated
+    file types.
+16. Select a backup and save. Confirm the picker displays its absolute server
+    path, the saved preference is normalized to the corresponding
+    plugin-relative path, and reopening settings expands from that file.
+17. Alternatively enter a plugin-relative backup such as
     `var/backups/history-YYYYMMDD-HHMMSS.sqlite3`, save, and confirm Shazam
     History shows that file's rows and prefixes its summary with the backup
     path.
-16. Confirm the player-only scope, every text filter, and every sort option
+18. Confirm the player-only scope, every text filter, and every sort option
     still apply to the backup view.
-17. Re-enable **Use current history database**, save, and confirm the path
+19. Re-enable **Use current history database**, save, and confirm the path
     remains present but disabled, current history returns, and the backup path
     disappears from the summary.
-18. Confirm new manual and automatic matches appear in the active database but
+20. Confirm new manual and automatic matches appear in the active database but
     do not change the selected backup's size, modification time, or row count.
-19. Confirm absolute paths, `..` traversal, missing files, directories,
+21. Confirm absolute paths outside the plugin, `..` traversal, missing files, directories,
     incompatible databases, and symlinks resolving outside the plugin produce
     a concise history error without changing the active database.
-20. Confirm **No filter** disables the value field, while choosing Station,
+22. Confirm **No filter** disables the value field, while choosing Station,
     Stream source, Artist, Song title, Album, or Capture type enables it.
-21. Save a Station filter such as `The Wave` with **Newest to Oldest** and
+23. Save a Station filter such as `The Wave` with **Newest to Oldest** and
     confirm those values remain selected for that player only.
-22. Open **My Apps → Shazam History** and confirm the summary reads like
+24. Open **My Apps → Shazam History** and confirm the summary reads like
     `All players - Station contains "The Wave" - Newest to Oldest`.
-23. Enable the player-only checkbox and confirm the summary uses the selected
+25. Enable the player-only checkbox and confirm the summary uses the selected
     player's display name instead of **All players**, and that both the player
     scope and text filter apply together.
-24. Confirm an empty filter value shows all records in the selected player
+26. Confirm an empty filter value shows all records in the selected player
     scope, and verify each chronological and alphabetical sort option.
 
 To compare manual sample modes with the same UI or CLI recognition action:

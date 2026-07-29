@@ -1,5 +1,15 @@
 # Changelog and failure history
 
+## 2026-07-28 — Native history database file selector
+
+- Added LMS's native file-browser classes to the per-player history database
+  input and restricted the picker to `.sqlite3` files.
+- Rendered valid saved paths as absolute server paths so the built-in browser
+  opens at the selected file or the plugin's `var/backups` directory.
+- Normalized valid absolute selections inside the plugin back to portable
+  plugin-relative saved paths. Canonical confinement still rejects external
+  files and symlink escapes.
+
 ## 2026-07-28 — Per-player read-only history database views
 
 - Added a default-on **Use current history database** per-player option and a
