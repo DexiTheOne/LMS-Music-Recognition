@@ -1,5 +1,19 @@
 # Changelog and failure history
 
+## 2026-07-28 — Linux/macOS runtime portability
+
+- Removed the hard-coded Homebrew Python fallback from recognition workers.
+- Centralized runtime discovery with optional `SHAZAMCAPTURE_PYTHON` and
+  `SHAZAMCAPTURE_FFMPEG` executable overrides.
+- Preserved the existing plugin-local `python/venv/bin/python` and
+  `imageio-ffmpeg` paths for the current development installation and Linux
+  migrations.
+- Added runtime readiness and selected-source diagnostics to
+  `shazamcapture status`. Invalid explicit overrides now fail closed with a
+  concise error.
+- Documented rebuilding the virtual environment after copying between macOS
+  and Linux; virtual environments are not portable between hosts.
+
 ## 2026-07-28 — Native history database file selector
 
 - Added LMS's native file-browser classes to the per-player history database

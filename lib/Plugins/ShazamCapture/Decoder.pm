@@ -3,9 +3,9 @@ package Plugins::ShazamCapture::Decoder;
 use strict;
 use Errno qw(EAGAIN EWOULDBLOCK EINTR);
 use Fcntl qw(F_GETFL F_SETFL O_NONBLOCK);
-use File::Glob qw(bsd_glob);
 use File::Spec;
 use POSIX qw(WNOHANG);
+use Plugins::ShazamCapture::Runtime;
 use Slim::Utils::Log;
 use Slim::Utils::Timers;
 
@@ -39,16 +39,13 @@ sub invalidate {
 	$scheduled{$id} = 0;
 }
 
-sub _ffmpeg {
-	return $ENV{SHAZAMCAPTURE_FFMPEG} if $ENV{SHAZAMCAPTURE_FFMPEG} && -x $ENV{SHAZAMCAPTURE_FFMPEG};
-	my @found = bsd_glob(File::Spec->catfile($root, 'python', 'venv', 'lib', 'python*',
-		'site-packages', 'imageio_ffmpeg', 'binaries', 'ffmpeg-*'));
-	return $found[0] if @found && -x $found[0];
-	return 'ffmpeg';
-}
-
 sub _start {
 	my ($id, $generation) = @_;
+	my ($ffmpeg, $runtime_error) = Plugins::ShazamCapture::Runtime::ffmpeg();
+	if (!$ffmpeg) {
+		$log->error($runtime_error || 'FFmpeg is unavailable');
+		return;
+	}
 	pipe(my $child_in, my $parent_in) or return;
 	pipe(my $parent_out, my $child_out) or do { close $child_in; close $parent_in; return };
 	my $safe = $id; $safe =~ s/[^a-z0-9]+/_/g;
@@ -63,7 +60,6 @@ sub _start {
 		CORE::open(STDIN, '<&', $child_in) or POSIX::_exit(126);
 		CORE::open(STDOUT, '>&', $child_out) or POSIX::_exit(126);
 		CORE::open(STDERR, '>>', $err) or POSIX::_exit(126);
-		my $ffmpeg = _ffmpeg();
 		exec {$ffmpeg} $ffmpeg, '-hide_banner', '-loglevel', 'error',
 			'-i', 'pipe:0', '-vn', '-ac', '1', '-ar', '16000',
 			'-c:a', 'pcm_s16le', '-f', 's16le', 'pipe:1';

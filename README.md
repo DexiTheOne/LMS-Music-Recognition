@@ -113,12 +113,20 @@ view independently of every other player.
 
 ## Dependencies
 
-Dependencies are installed in the plugin-local environment. The
-`imageio-ffmpeg` package supplies a plugin-local FFmpeg binary. An explicit
-`SHAZAMCAPTURE_FFMPEG` service environment value can override it.
+Linux and macOS are supported. Dependencies are installed in the plugin-local
+environment; do not copy `python/venv` between operating systems or CPU
+architectures. The `imageio-ffmpeg` package supplies a plugin-local FFmpeg
+binary.
 
-    /opt/homebrew/bin/python3.12 -m venv "python/venv"
+    python3.12 -m venv "python/venv"
     "python/venv/bin/pip" install -r "python/requirements.txt"
+
+The worker uses `python/venv/bin/python` by default. The LMS service environment
+may set `SHAZAMCAPTURE_PYTHON` or `SHAZAMCAPTURE_FFMPEG` to an absolute
+executable path when a site needs an explicit override. An invalid explicit
+override fails closed and is reported by `shazamcapture status`; it never falls
+back silently to a host-specific location. See `docs/MIGRATION.md` for a
+Mac-to-Linux copy procedure.
 
 Encoded dumps are disabled in code by default. They contain copyrighted audio
 and must be enabled deliberately for development.

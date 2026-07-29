@@ -21,6 +21,7 @@ use Plugins::ShazamCapture::HistoryUI;
 use Plugins::ShazamCapture::Hook;
 use Plugins::ShazamCapture::Playback;
 use Plugins::ShazamCapture::Auto;
+use Plugins::ShazamCapture::Runtime;
 use Plugins::ShazamCapture::UI;
 use Plugins::ShazamCapture::Worker;
 
@@ -53,6 +54,7 @@ sub initPlugin {
 	}
 	$root = File::Spec->rel2abs(File::Spec->catdir(dirname(__FILE__), qw(.. .. ..)));
 	make_path(File::Spec->catdir($root, 'var', $_)) for qw(tmp dumps logs);
+	Plugins::ShazamCapture::Runtime::init($root);
 	Plugins::ShazamCapture::Decoder::init($root);
 	$prefs->init({
 		saveDebugWav => 0,
@@ -134,6 +136,7 @@ sub command {
 			last_result=>Plugins::ShazamCapture::Worker::last($id),
 			history_entries=>Plugins::ShazamCapture::History::count(),
 			manual_sample_mode=>_manual_sample_mode(),
+			runtime=>Plugins::ShazamCapture::Runtime::status(),
 			auto=>Plugins::ShazamCapture::Auto::status($client),
 		});
 	}
@@ -203,7 +206,9 @@ sub start_recognition {
 	unlink $path unless $started;
 	return $started
 		? {ok=>1,started=>1,generation=>$generation}
-		: {ok=>0,stage=>'worker',error=>'Recognition is already running or worker could not start'};
+		: {ok=>0,stage=>'worker',error=>
+			(Plugins::ShazamCapture::Worker::start_error($id)
+				|| 'Recognition is already running or worker could not start')};
 }
 
 sub _start_sample_wait {
@@ -274,7 +279,8 @@ sub _sample_ready {
 		unlink $path;
 		_finish_recognition($session, {
 			ok=>JSON::XS::false, stage=>'worker',
-			error=>'Recognition worker could not start'
+			error=>(Plugins::ShazamCapture::Worker::start_error($id)
+				|| 'Recognition worker could not start')
 		});
 	}
 }
@@ -487,7 +493,8 @@ sub _retry_recognition {
 		unlink $path;
 		_finish_recognition($session, {
 			ok=>JSON::XS::false, stage=>'worker',
-			error=>'Recognition retry worker could not start'
+			error=>(Plugins::ShazamCapture::Worker::start_error($id)
+				|| 'Recognition retry worker could not start')
 		});
 	}
 }

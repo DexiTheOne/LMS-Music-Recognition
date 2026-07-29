@@ -4,12 +4,14 @@ use strict;
 use File::Spec;
 use JSON::XS;
 use POSIX qw(WNOHANG);
+use Plugins::ShazamCapture::Runtime;
 use Slim::Utils::Timers;
 
-my (%jobs, %last);
+my (%jobs, %last, %start_error);
 
 sub running { $jobs{lc $_[0]} ? 1 : 0 }
 sub last { $last{lc $_[0]} }
+sub start_error { $start_error{lc $_[0]} }
 sub cancel {
 	my ($class, $id) = @_;
 	$id = lc $id;
@@ -32,14 +34,21 @@ sub start {
 	my ($class, $id, $generation, $input, $root, $timeout, $sample_seconds, $save_debug_wav, $done) = @_;
 	$id = lc $id;
 	return 0 if $jobs{$id};
+	delete $start_error{$id};
+	my ($python, $runtime_error) = Plugins::ShazamCapture::Runtime::python();
+	if (!$python) {
+		$start_error{$id} = $runtime_error || 'Plugin Python is unavailable';
+		return 0;
+	}
 	my $safe = $id; $safe =~ s/[^a-z0-9]+/_/g;
 	my $out = File::Spec->catfile($root, 'var', 'tmp', "result_${safe}_$$.json");
 	my $err = File::Spec->catfile($root, 'var', 'tmp', "result_${safe}_$$.err");
-	my $python = File::Spec->catfile($root, 'python', 'venv', 'bin', 'python');
-	$python = '/opt/homebrew/bin/python3' unless -x $python;
 	my $helper = File::Spec->catfile($root, 'python', 'recognize.py');
 	my $pid = fork();
-	return 0 unless defined $pid;
+	if (!defined $pid) {
+		$start_error{$id} = "Recognition worker could not fork: $!";
+		return 0;
+	}
 	if (!$pid) {
 		# LMS ties the process-wide output handles to its log trap. The child
 		# must detach its inherited copies before redirecting worker output.

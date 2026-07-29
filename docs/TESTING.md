@@ -273,14 +273,27 @@ xmllint --noout install.xml
 Expected: no broken requirements, successful Shazam import, an FFmpeg path
 inside `python/venv`, and no XML error.
 
-To rebuild dependencies, use Python 3.12 and remain inside this project:
+To rebuild dependencies, use a compatible Python 3.12 interpreter and remain
+inside this project:
 
 ```bash
-/opt/homebrew/bin/python3.12 -m venv python/venv
+python3.12 -m venv python/venv
 python/venv/bin/python -m pip install -r python/requirements.txt
 ```
 
-Do not install globally.
+Do not install globally. On a host where Python 3.12 has a nonstandard command
+name, use that absolute interpreter path only for the `-m venv` command.
+
+After LMS starts, `shazamcapture status` must report a `runtime` object whose
+`python_ready` and `ffmpeg_ready` values are `1`. The normal development
+installation should report `python_source:plugin` and
+`ffmpeg_source:plugin`.
+
+To test explicit override validation without changing LMS preferences, start a
+separate test process with `SHAZAMCAPTURE_PYTHON` or
+`SHAZAMCAPTURE_FFMPEG` set. A valid executable must report
+`source:environment`; a missing or non-executable override must report
+`ready:0` with a concise error and must not fall back silently.
 
 ## LMS startup verification
 
