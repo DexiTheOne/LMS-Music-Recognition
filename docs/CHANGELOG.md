@@ -1,5 +1,14 @@
 # Changelog and failure history
 
+## 2026-07-28 — Optional overlay clearing after automatic no-match
+
+- Added a default-off global option to restore the station's original metadata
+  when an automatic sequence exhausts its retries without a valid confirmed
+  song. A later successful sequence publishes the recognition overlay again.
+- Enabling **Accept the first match after two no-results** preserves the prior
+  overlay after an unsuccessful sequence. Manual recognition, errors, stale
+  results, and early retry termination also leave it intact.
+
 ## 2026-07-28 — Per-player history views
 
 - Added independent per-player Shazam History settings for current-player

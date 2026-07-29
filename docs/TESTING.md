@@ -20,22 +20,32 @@ web UI:
 3. Confirm the recognition controls default to a 10-second initial sample, one
    retry, one consecutive confirmation, a 10-second retry sample, and a
    5-second retry delay.
-4. Confirm all five numeric controls render as LMS/MUI-style sliders rather
+4. Confirm **Remove recognition overlay after an automatic no-match sequence**
+   is off by default. Enable automatic recognition, its metadata overlay, and
+   this option; after all configured attempts return no match, confirm the
+   original station metadata returns. Confirm the next successful automatic
+   sequence publishes its recognized metadata again.
+5. With **Accept the first match after two no-results** disabled, confirm an
+   exhausted sequence with no valid confirmed song clears the overlay. Enable
+   the confirmation bypass and confirm the same unsuccessful sequence preserves
+   the overlay. Worker errors, stale results, and stopped retry sequences must
+   also preserve it.
+6. Confirm all five numeric controls render as LMS/MUI-style sliders rather
    than browser-native number boxes.
-5. Save boundary values and confirm they persist: sample lengths 5–30 seconds,
+7. Save boundary values and confirm they persist: sample lengths 5–30 seconds,
    retries 0–10, consecutive confirmations 1–11, and delay 1–30 seconds.
-6. Confirm **Accept the first match after two no-results** is available and
+8. Confirm **Accept the first match after two no-results** is available and
    defaults to off. Enable it with at least two retries and a confirmation
    value above 1; after two initial no-matches, confirm the next match succeeds
    without another confirmation attempt.
-7. Confirm **Show Spotify information in Shazam History** is available and is
+9. Confirm **Show Spotify information in Shazam History** is available and is
    enabled by default.
-8. Disable it, save, and confirm history detail pages contain no Spotify link
+10. Disable it, save, and confirm history detail pages contain no Spotify link
    and no **No Spotify Link Returned** row.
-9. Confirm existing `spotify_url` database values are unchanged, then enable
+11. Confirm existing `spotify_url` database values are unchanged, then enable
    the setting again and confirm the Spotify row returns.
-10. Open settings for a selected physical player and select **Shazam Capture**.
-11. Confirm **Show only this player's history**, **Filter history by**,
+12. Open settings for a selected physical player and select **Shazam Capture**.
+13. Confirm **Show only this player's history**, **Filter history by**,
     **Filter value**, and **Sort order** are present.
 12. Confirm **No filter** disables the value field, while choosing Station,
     Stream source, Artist, Song title, Album, or Capture type enables it.

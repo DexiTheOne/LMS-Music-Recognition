@@ -66,6 +66,7 @@ sub initPlugin {
 		retryDelaySeconds => 5,
 		autoRecognition => 0,
 		autoMetadataOverlay => 0,
+		autoClearOverlayOnNoMatch => 0,
 		autoIgnoredStations => '',
 		autoCooldownSeconds => 120,
 		historyDatabase => 'history.sqlite3',
@@ -523,6 +524,10 @@ sub _finish_recognition {
 		$result->{confirmations} = $session->{confirmations};
 		$result->{confirmations_required} = $session->{confirmations_required};
 	}
+	$result->{exhausted_without_valid_match} = JSON::XS::true
+		if $session->{trigger_method} eq 'auto'
+			&& $result->{ok} && !$result->{matched} && !$result->{stale}
+			&& $session->{attempt} > $session->{retries};
 	$result->{attempts} = $session->{attempt};
 	$result->{retried} = $session->{attempt} > 1 ? JSON::XS::true : JSON::XS::false;
 	if (

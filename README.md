@@ -48,7 +48,9 @@ sources such as Spotty are excluded. A comma-separated station ignore list can
 disable automatic sampling by LMS station name. When the separate metadata
 overlay option is enabled, successful automatic samples temporarily replace
 the radio title, artist, album, and artwork; manual samples never publish an
-overlay.
+overlay. A separate default-off option restores the station's original metadata
+when every attempt in an automatic sequence returns no match. The next
+successful automatic sequence publishes a new overlay.
 
 The LMS **My Apps** menu includes **Shazam History**. Each player's plugin
 settings can independently limit the view to that player, apply a
@@ -86,7 +88,10 @@ LMS exposes a global **Shazam Capture** page under plugin settings and a
 **Show Spotify information in Shazam History**, enabled by default. Disabling
 it hides both Spotify links and the missing-link message from history detail
 pages without changing recognition, URL normalization, or database storage. It
-It also offers a default-off **Save recognition audio for debugging** option.
+It also offers default-off options to remove the automatic metadata overlay
+after a sequence exhausts its retries without a valid confirmed song and to
+**Save recognition audio for debugging**. Enabling **Accept the first match
+after two no-results** suppresses this overlay clearing.
 When enabled, every exact normalized WAV submitted to Shazam is retained in
 `var/dumps`, named from the returned title (or `NoResult`) and local date/time.
 These files are retained until manually deleted. The page can also select or

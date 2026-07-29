@@ -156,6 +156,16 @@ sub _tick {
 			) {
 				_publish_overlay($client, $current, $result->{track});
 			}
+			elsif (
+				$result->{exhausted_without_valid_match}
+				&& $prefs->get('autoClearOverlayOnNoMatch')
+				&& !$prefs->get('skipConfirmationsAfterTwoNoMatches')
+			) {
+				clear_overlay(
+					$client,
+					'automatic recognition retries exhausted without a valid match'
+				);
+			}
 			return unless eligible($client);
 			_schedule($client, _cooldown());
 		},

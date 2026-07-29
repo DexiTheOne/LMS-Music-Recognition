@@ -26,7 +26,8 @@ sub prefs {
 		'consecutiveConfirmations',
 		'skipConfirmationsAfterTwoNoMatches',
 		'retrySampleSeconds', 'retryDelaySeconds',
-		'autoRecognition', 'autoMetadataOverlay', 'autoIgnoredStations',
+		'autoRecognition', 'autoMetadataOverlay',
+		'autoClearOverlayOnNoMatch', 'autoIgnoredStations',
 		'autoCooldownSeconds'
 	);
 }
@@ -94,7 +95,7 @@ sub handler {
 	if ($params->{saveSettings} && !defined $params->{pref_skipConfirmationsAfterTwoNoMatches}) {
 		$params->{pref_skipConfirmationsAfterTwoNoMatches} = 0;
 	}
-	for my $name (qw(autoRecognition autoMetadataOverlay)) {
+	for my $name (qw(autoRecognition autoMetadataOverlay autoClearOverlayOnNoMatch)) {
 		$params->{"pref_$name"} = 0
 			if $params->{saveSettings} && !defined $params->{"pref_$name"};
 	}

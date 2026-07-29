@@ -84,6 +84,15 @@
 		/>
 	[% END %]
 
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH" desc="PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH_DESC" %]
+		<input type="checkbox"
+			name="pref_autoClearOverlayOnNoMatch"
+			id="autoClearOverlayOnNoMatch"
+			value="1"
+			[% IF prefs.autoClearOverlayOnNoMatch %]checked="checked"[% END %]
+		/>
+	[% END %]
+
 	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS" desc="PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS_DESC" %]
 		<input type="text" class="stdedit"
 			name="pref_autoIgnoredStations" id="autoIgnoredStations"

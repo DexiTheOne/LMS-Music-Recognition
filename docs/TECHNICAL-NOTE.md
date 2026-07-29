@@ -63,8 +63,8 @@ is available:
 
 - `Settings.pm` provides the server-wide plugin settings page and persists the
   history display, same-stream metadata, sample duration, retry count, retry sample
-  duration, retry delay, automatic recognition, overlay, station ignore list,
-  automatic cooldown, and active history database preferences in
+  duration, retry delay, automatic recognition, overlay, all-no-match overlay
+  clearing, station ignore list, automatic cooldown, and active history database preferences in
   `plugin.shazamcapture`. It also handles independent database selection,
   backup, and guarded clear actions outside the ordinary preference-save path.
 - `PlayerSettings.pm` uses `needsClient` and client-scoped plugin preferences
@@ -83,6 +83,12 @@ PCM ring and passes that same duration to Shazamio's signature generator.
 No-match results remain internal until retries are exhausted. Retries use LMS
 timers, require newly captured PCM, and stop on worker errors, stream
 generation changes, or PCM epoch changes.
+An automatic result is marked as exhausted without a valid match when the
+configured retry budget completes without an accepted, confirmed song. The
+optional default-off overlay-clear preference restores native station metadata
+for that terminal state only when the two-no-result confirmation bypass is
+disabled. Enabling that bypass preserves the prior overlay. Errors, stale
+results, early retry termination, and manual requests also leave it intact.
 
 Numeric settings must use LMS's enhanced slider-input convention rather than
 raw HTML `type="number"` controls. Use a text input with `stdedit` and a
