@@ -56,10 +56,13 @@ The LMS **My Apps** menu includes **Shazam History**. Each player's plugin
 settings can independently limit the view to that player, apply a
 case-insensitive text filter by station, stream source, artist, song title,
 album, or capture type, and choose chronological or alphabetical ordering.
-The active scope, filter, and sort appear above the history rows. Selecting a
-song opens its full metadata, source, player,
-time, sample type, and external links. Missing artwork uses LMS's default cover image, and
-missing Spotify results are labeled **No Spotify Link Returned**.
+The per-player page can also point the view at a plugin-local `.sqlite3`
+snapshot, normally beneath `var/backups`; snapshots are opened strictly
+read-only while recognition continues writing to the active database. The
+active backup path, scope, filter, and sort appear above the history rows.
+Selecting a song opens its full metadata, source, player, time, sample type,
+and external links. Missing artwork uses LMS's default cover image, and missing
+Spotify results are labeled **No Spotify Link Returned**.
 
 Apple Music and Spotify URLs are normalized before storage. Tracking query
 parameters and fragments are removed; Spotify app and intent links are
@@ -88,7 +91,7 @@ LMS exposes a global **Shazam Capture** page under plugin settings and a
 **Show Spotify information in Shazam History**, enabled by default. Disabling
 it hides both Spotify links and the missing-link message from history detail
 pages without changing recognition, URL normalization, or database storage. It
-It also offers default-off options to remove the automatic metadata overlay
+also offers default-off options to remove the automatic metadata overlay
 after a sequence exhausts its retries without a valid confirmed song and to
 **Save recognition audio for debugging**. Enabling **Accept the first match
 after two no-results** suppresses this overlay clearing.
@@ -103,7 +106,8 @@ lengths, no-match retry count, and retry delay. Numeric settings use LMS's
 native enhanced slider convention
 (`stdedit sliderInput_MIN_MAX_STEP`) rather than browser-native number inputs,
 so future numeric settings should follow the same pattern. The per-player page
-remains an informational placeholder.
+configures its history scope, filter, sort, and optional read-only database
+view independently of every other player.
 
 ## Dependencies
 

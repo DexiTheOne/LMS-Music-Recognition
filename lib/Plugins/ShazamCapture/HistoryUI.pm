@@ -2,6 +2,7 @@ package Plugins::ShazamCapture::HistoryUI;
 
 use strict;
 
+use File::Spec;
 use Plugins::ShazamCapture::History;
 use Slim::Utils::Prefs;
 
@@ -12,6 +13,8 @@ $prefs->init({
 	historyFilterField    => 'none',
 	historyFilterValue    => '',
 	historySortOrder      => 'newest',
+	historyUseCurrentDatabase => 1,
+	historyViewDatabasePath   => File::Spec->catfile('var', 'backups', ''),
 });
 
 sub feed {
@@ -23,20 +26,42 @@ sub feed {
 		my $filter_field = $client_prefs->get('historyFilterField') || 'none';
 		my $filter_value = $client_prefs->get('historyFilterValue') || '';
 		my $sort_order = $client_prefs->get('historySortOrder') || 'newest';
-		my $rows = Plugins::ShazamCapture::History::all_matches({
+		my $use_current = $client_prefs->get('historyUseCurrentDatabase');
+		$use_current = 1 unless defined $use_current;
+		my $view_path = $client_prefs->get('historyViewDatabasePath')
+			|| File::Spec->catfile('var', 'backups', '');
+		my $options = {
 			player_id    => $this_player ? $client->id : undef,
 			filter_field => $filter_field,
 			filter_value => $filter_value,
 			sort_order   => $sort_order,
-		});
+		};
+		my ($rows, $database_label, $view_error);
+		if ($use_current) {
+			$rows = Plugins::ShazamCapture::History::all_matches($options);
+		}
+		else {
+			eval {
+				($rows, $database_label) =
+					Plugins::ShazamCapture::History::view_matches($view_path, $options);
+			};
+			$view_error = _view_error($@) if $@;
+			$rows ||= [];
+			$database_label ||= $view_path;
+		}
 		my $subtitle = _subtitle(
-			$client, $this_player, $filter_field, $filter_value, $sort_order
+			$client, $this_player, $filter_field, $filter_value, $sort_order,
+			$use_current ? undef : $database_label,
 		);
 		my @items = (
 			{
 				name => $subtitle,
 				type => 'textarea',
 			},
+			($view_error ? ({
+				name => "Unable to view database: $view_error",
+				type => 'text',
+			}) : ()),
 			map { _history_item($_) } @$rows,
 		);
 		$callback->({
@@ -47,7 +72,10 @@ sub feed {
 }
 
 sub _subtitle {
-	my ($client, $this_player, $filter_field, $filter_value, $sort_order) = @_;
+	my (
+		$client, $this_player, $filter_field, $filter_value, $sort_order,
+		$database_label,
+	) = @_;
 	my $scope = 'All players';
 	if ($this_player && $client) {
 		$scope = eval { $client->name } || eval { $client->id } || 'Selected player';
@@ -77,7 +105,18 @@ sub _subtitle {
 		title_desc  => 'Song Title Z-A',
 	);
 	my $sort = $sort_labels{$sort_order || ''} || $sort_labels{newest};
-	return join(' - ', $scope, $filter, $sort);
+	my @parts;
+	push @parts, 'Backup: ' . _plain_text($database_label)
+		if defined $database_label && length $database_label;
+	push @parts, $scope, $filter, $sort;
+	return join(' - ', @parts);
+}
+
+sub _view_error {
+	my ($error) = @_;
+	$error = _plain_text($error);
+	$error =~ s/\s+at .+? line \d+\.?\z//;
+	return $error || 'Unknown database error';
 }
 
 sub _plain_text {

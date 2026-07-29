@@ -146,8 +146,11 @@ Do not move the Perl modules to the project root. LMS resolves
   verified online backups plus backup-before-clear management.
 - `HistoryUI.pm`: exposes **Shazam History** as an LMS app with song rows,
   remote artwork or LMS's default cover, complete metadata, and clickable
-  external links. The global `showSpotifyInHistory` preference suppresses only
-  the Spotify detail row; capture and database storage remain unchanged.
+  external links. Per-player views can use either the active database or a
+  plugin-confined database opened with SQLite's read-only flag; recognition
+  writes always continue through the separate active database handle. The
+  global `showSpotifyInHistory` preference suppresses only the Spotify detail
+  row; capture and database storage remain unchanged.
 - `Settings.pm`: registers the global LMS settings page and persists the
   default-on Spotify history display preference plus the default-off
   same-stream metadata PCM-clear preference, recognition sample lengths,
@@ -158,7 +161,8 @@ Do not move the Perl modules to the project root. LMS resolves
   `type="number"` controls.
 - `PlayerSettings.pm`: registers client-scoped history display preferences:
   optional current-player scope, a whitelisted case-insensitive field filter,
-  its text value, and chronological or alphabetical sort order.
+  its text value, chronological or alphabetical sort order, and an optional
+  retained plugin-relative read-only database path.
 - `UI.pm`: adds **Recognize Song** to `Slim::Menu::TrackInfo` using LMS's
   native asynchronous callback pattern, leaves native loading animations
   visible, and routes terminal results only to the initiating UI path.

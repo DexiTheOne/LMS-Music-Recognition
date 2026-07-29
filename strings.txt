@@ -193,6 +193,18 @@ PLUGIN_SHAZAMCAPTURE_PLAYER_SETTINGS_EMPTY
 PLUGIN_SHAZAMCAPTURE_HISTORY_THIS_PLAYER
 	EN	Show only this player's history
 
+PLUGIN_SHAZAMCAPTURE_HISTORY_USE_CURRENT_DATABASE
+	EN	Use current history database
+
+PLUGIN_SHAZAMCAPTURE_HISTORY_USE_CURRENT_DATABASE_DESC
+	EN	Show the active writable history database. Uncheck this option to view the saved plugin-relative database path below. New recognition results always continue to use the active database.
+
+PLUGIN_SHAZAMCAPTURE_HISTORY_VIEW_DATABASE_PATH
+	EN	View another history database
+
+PLUGIN_SHAZAMCAPTURE_HISTORY_VIEW_DATABASE_PATH_DESC
+	EN	Enter a plugin-relative .sqlite3 path, normally beneath var/backups. The file is opened strictly read-only and must remain inside the Shazam Capture plugin directory. Its saved path is retained while Use current history database is enabled.
+
 PLUGIN_SHAZAMCAPTURE_HISTORY_THIS_PLAYER_DESC
 	EN	Limit Shazam History to recognitions made for this player. This works independently of the text filter and sort order.
 

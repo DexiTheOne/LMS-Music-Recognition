@@ -45,18 +45,35 @@ web UI:
 11. Confirm existing `spotify_url` database values are unchanged, then enable
    the setting again and confirm the Spotify row returns.
 12. Open settings for a selected physical player and select **Shazam Capture**.
-13. Confirm **Show only this player's history**, **Filter history by**,
+13. Confirm **Use current history database**, **View another history
+    database**, **Show only this player's history**, **Filter history by**,
     **Filter value**, and **Sort order** are present.
-12. Confirm **No filter** disables the value field, while choosing Station,
+14. Confirm **Use current history database** defaults on and disables the
+    database-path field, whose initial value is `var/backups/`.
+15. Uncheck it, enter a plugin-relative backup such as
+    `var/backups/history-YYYYMMDD-HHMMSS.sqlite3`, save, and confirm Shazam
+    History shows that file's rows and prefixes its summary with the backup
+    path.
+16. Confirm the player-only scope, every text filter, and every sort option
+    still apply to the backup view.
+17. Re-enable **Use current history database**, save, and confirm the path
+    remains present but disabled, current history returns, and the backup path
+    disappears from the summary.
+18. Confirm new manual and automatic matches appear in the active database but
+    do not change the selected backup's size, modification time, or row count.
+19. Confirm absolute paths, `..` traversal, missing files, directories,
+    incompatible databases, and symlinks resolving outside the plugin produce
+    a concise history error without changing the active database.
+20. Confirm **No filter** disables the value field, while choosing Station,
     Stream source, Artist, Song title, Album, or Capture type enables it.
-13. Save a Station filter such as `The Wave` with **Newest to Oldest** and
+21. Save a Station filter such as `The Wave` with **Newest to Oldest** and
     confirm those values remain selected for that player only.
-14. Open **My Apps → Shazam History** and confirm the summary reads like
+22. Open **My Apps → Shazam History** and confirm the summary reads like
     `All players - Station contains "The Wave" - Newest to Oldest`.
-15. Enable the player-only checkbox and confirm the summary uses the selected
+23. Enable the player-only checkbox and confirm the summary uses the selected
     player's display name instead of **All players**, and that both the player
     scope and text filter apply together.
-16. Confirm an empty filter value shows all records in the selected player
+24. Confirm an empty filter value shows all records in the selected player
     scope, and verify each chronological and alphabetical sort option.
 
 To compare manual sample modes with the same UI or CLI recognition action:

@@ -2,6 +2,7 @@ package Plugins::ShazamCapture::PlayerSettings;
 
 use strict;
 use base qw(Slim::Web::Settings);
+use File::Spec;
 use Slim::Utils::Prefs;
 
 my $prefs = preferences('plugin.shazamcapture');
@@ -10,6 +11,8 @@ $prefs->init({
 	historyFilterField    => 'none',
 	historyFilterValue    => '',
 	historySortOrder      => 'newest',
+	historyUseCurrentDatabase => 1,
+	historyViewDatabasePath   => File::Spec->catfile('var', 'backups', ''),
 });
 
 sub name {
@@ -36,6 +39,8 @@ sub prefs {
 		'historyFilterField',
 		'historyFilterValue',
 		'historySortOrder',
+		'historyUseCurrentDatabase',
+		'historyViewDatabasePath',
 	);
 }
 
@@ -44,6 +49,8 @@ sub handler {
 	if ($params->{saveSettings}) {
 		$params->{pref_historyThisPlayerOnly} = 0
 			unless defined $params->{pref_historyThisPlayerOnly};
+		$params->{pref_historyUseCurrentDatabase} = 0
+			unless defined $params->{pref_historyUseCurrentDatabase};
 
 		my %filter = map { $_ => 1 }
 			qw(none station source artist title album capture);
@@ -62,6 +69,19 @@ sub handler {
 		$params->{pref_historyFilterValue} = $value;
 		$params->{pref_historyFilterValue} = ''
 			if $params->{pref_historyFilterField} eq 'none';
+
+		if (!defined $params->{pref_historyViewDatabasePath}) {
+			my $saved = $prefs->client($client)->get('historyViewDatabasePath');
+			$params->{pref_historyViewDatabasePath} = defined $saved
+				? $saved
+				: File::Spec->catfile('var', 'backups', '');
+		}
+		my $database_path = $params->{pref_historyViewDatabasePath};
+		$database_path =~ s/^\s+|\s+$//g;
+		$database_path = substr($database_path, 0, 500);
+		$database_path = File::Spec->catfile('var', 'backups', '')
+			unless length $database_path;
+		$params->{pref_historyViewDatabasePath} = $database_path;
 	}
 	return $class->SUPER::handler($client, $params, @args);
 }

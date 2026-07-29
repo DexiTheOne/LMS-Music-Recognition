@@ -68,8 +68,8 @@ is available:
   `plugin.shazamcapture`. It also handles independent database selection,
   backup, and guarded clear actions outside the ordinary preference-save path.
 - `PlayerSettings.pm` uses `needsClient` and client-scoped plugin preferences
-  to configure the history scope, text filter, and sort order independently
-  for each player.
+  to configure the history scope, text filter, sort order, and optional
+  plugin-relative read-only database view independently for each player.
 
 Recognition defaults to a 10-second initial sample, one additional attempt, one
 required confirmation (the first match is accepted), a 10-second retry sample,
@@ -108,7 +108,8 @@ or correctness boundary.
 The Spotify preference defaults on and is evaluated whenever a history detail
 feed is built. Turning it off suppresses only the Spotify UI row; recognition,
 normalization, and the `spotify_url` database column remain active. The
-per-player page remains an informational placeholder.
+per-player database path remains saved while **Use current history database**
+disables its input.
 
 ## Recognition history and URL normalization
 
@@ -122,12 +123,16 @@ recognitions of the same song remain separate events.
 
 The **Shazam History** OPML app applies the initiating player's saved history
 scope, case-insensitive field filter, and whitelisted sort order using bound
-SQLite parameters. A native browse textarea summarizes the active settings
-above the rows. The app lists the song title and remote artwork. If
-Shazam supplies no artwork, the row uses LMS's `html/images/cover.png` rather
-than downloading or storing a local thumbnail. Detail pages expose all stored
-metadata. Apple Music, Spotify, and Shazam rows use LMS's `weblink` field so
-Material Skin can open them.
+SQLite parameters. It normally queries the active writable handle. An optional
+plugin-confined path is instead opened with SQLite's read-only flag for the
+duration of one feed request; it never replaces the active handle used by
+`record`. Canonical path checks reject traversal and symlink escapes. A native
+browse textarea summarizes the alternate database, when present, and the
+active settings above the rows. The app lists the song title and remote
+artwork. If Shazam supplies no artwork, the row uses LMS's
+`html/images/cover.png` rather than downloading or storing a local thumbnail.
+Detail pages expose all stored metadata. Apple Music, Spotify, and Shazam rows
+use LMS's `weblink` field so Material Skin can open them.
 
 History stores `trigger_method` as `auto` or `manual`; detail pages render
 those stable values as **Auto Sample** and **Manual Sample**. Additive

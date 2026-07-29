@@ -2,7 +2,9 @@ package Plugins::ShazamCapture::History;
 
 use strict;
 use DBI;
+use DBD::SQLite ();
 use JSON::XS;
+use Cwd qw(abs_path);
 use File::Basename qw(basename);
 use File::Path qw(make_path);
 use File::Spec;
@@ -332,6 +334,83 @@ sub count {
 sub all_matches {
 	my ($options) = @_;
 	return [] unless $dbh;
+	return _all_matches_from_handle($dbh, $options);
+}
+
+sub view_matches {
+	my ($relative_path, $options) = @_;
+	die 'recognition history is not initialized' unless $root;
+	my ($view_path, $display_path) = _view_database_path($relative_path);
+	my $view_dbh = eval {
+		DBI->connect(
+			"dbi:SQLite:dbname=$view_path", '', '',
+			{
+				RaiseError        => 1,
+				PrintError        => 0,
+				AutoCommit        => 1,
+				ReadOnly          => 1,
+				sqlite_open_flags => DBD::SQLite::OPEN_READONLY(),
+				sqlite_unicode    => 1,
+			}
+		);
+	};
+	die 'Selected database could not be opened read-only' unless $view_dbh;
+	my $rows = eval {
+		my $columns = $view_dbh->selectall_arrayref(
+			'PRAGMA table_info(recognition_history)', { Slice => {} }
+		);
+		my %columns = map { $_->{name} => 1 } @$columns;
+		for my $required (qw(
+			id recognized_at player_id generation ok matched title artist album shazam_key
+			player_name source_name source_url technical_source apple_music_url
+			spotify_url artwork_url shazam_url trigger_method
+		)) {
+			die 'Selected database does not contain a compatible recognition history'
+				unless $columns{$required};
+		}
+		_all_matches_from_handle($view_dbh, $options);
+	};
+	my $error = $@;
+	eval { $view_dbh->disconnect };
+	if ($error) {
+		die 'Selected database does not contain a compatible recognition history'
+			if $error =~ /^Selected database does not contain/;
+		die 'Selected database could not be read as recognition history';
+	}
+	return ($rows, $display_path);
+}
+
+sub _view_database_path {
+	my ($relative_path) = @_;
+	$relative_path = '' unless defined $relative_path;
+	$relative_path =~ s/^\s+|\s+$//g;
+	die 'Enter a plugin-relative .sqlite3 database path'
+		unless length $relative_path
+			&& $relative_path =~ /\.sqlite3\z/i
+			&& !File::Spec->file_name_is_absolute($relative_path);
+	my @parts = File::Spec->splitdir($relative_path);
+	die 'Database path must stay inside the plugin directory'
+		if grep { !length($_) || $_ eq '.' || $_ eq '..' } @parts;
+	my $candidate = File::Spec->catfile($root, @parts);
+	die "Database file does not exist: $relative_path"
+		unless -f $candidate;
+	my $real_root = abs_path($root);
+	my $real_candidate = abs_path($candidate);
+	die 'Database path could not be resolved'
+		unless defined $real_root && defined $real_candidate;
+	my $prefix = File::Spec->catfile($real_root, '');
+	my ($compare_candidate, $compare_prefix) = ($real_candidate, $prefix);
+	if (File::Spec->case_tolerant) {
+		$compare_candidate = lc $compare_candidate;
+		$compare_prefix = lc $compare_prefix;
+	}
+	die 'Database path must stay inside the plugin directory'
+		unless index($compare_candidate, $compare_prefix) == 0;
+	return ($real_candidate, File::Spec->catfile(@parts));
+}
+
+sub _all_matches_from_handle {
+	my ($handle, $options) = @_;
 	$options ||= {};
 
 	my @where = ('ok=1', 'matched=1');
@@ -371,7 +450,7 @@ sub all_matches {
 	);
 	my $order = $sort_orders{$options->{sort_order} || 'newest'}
 		|| $sort_orders{newest};
-	my $rows = $dbh->selectall_arrayref(
+	my $rows = $handle->selectall_arrayref(
 		'SELECT id,recognized_at,player_id,generation,title,artist,album,shazam_key,'
 		. 'player_name,source_name,source_url,technical_source,apple_music_url,'
 		. 'spotify_url,artwork_url,shazam_url,trigger_method '

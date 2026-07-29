@@ -1,5 +1,25 @@
 [% PROCESS settings/header.html %]
 
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_USE_CURRENT_DATABASE" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_USE_CURRENT_DATABASE_DESC" %]
+		<input type="checkbox"
+			name="pref_historyUseCurrentDatabase"
+			id="historyUseCurrentDatabase"
+			value="1"
+			onchange="document.getElementById('historyViewDatabasePath').disabled=this.checked;"
+			[% IF !prefs.historyUseCurrentDatabase.defined || prefs.historyUseCurrentDatabase %]checked="checked"[% END %]
+		/>
+	[% END %]
+
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_VIEW_DATABASE_PATH" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_VIEW_DATABASE_PATH_DESC" %]
+		<input type="text" class="stdedit"
+			name="pref_historyViewDatabasePath"
+			id="historyViewDatabasePath"
+			value="[% IF prefs.historyViewDatabasePath %][% prefs.historyViewDatabasePath | html %][% ELSE %]var/backups/[% END %]"
+			size="60"
+			[% IF !prefs.historyUseCurrentDatabase.defined || prefs.historyUseCurrentDatabase %]disabled="disabled"[% END %]
+		/>
+	[% END %]
+
 	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_HISTORY_THIS_PLAYER" desc="PLUGIN_SHAZAMCAPTURE_HISTORY_THIS_PLAYER_DESC" %]
 		<input type="checkbox"
 			name="pref_historyThisPlayerOnly"

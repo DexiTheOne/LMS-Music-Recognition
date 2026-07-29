@@ -1,5 +1,21 @@
 # Changelog and failure history
 
+## 2026-07-28 — Per-player read-only history database views
+
+- Added a default-on **Use current history database** per-player option and a
+  retained plugin-relative `.sqlite3` path which defaults to `var/backups/`.
+- Alternate databases are opened through a separate SQLite handle using the
+  read-only open flag. Manual and automatic recognition continue writing only
+  through the active writable history handle.
+- Confined alternate paths to canonical files within the plugin directory,
+  rejecting absolute paths, traversal, missing files, directories, and
+  symlinks that resolve outside the plugin.
+- Applied the existing player scope, text filter, and sort controls to
+  alternate databases, and added the backup path to the native history summary
+  only while an alternate database is selected.
+- Added concise history-row errors for missing, invalid, unreadable, and
+  incompatible databases without changing the active database.
+
 ## 2026-07-28 — Optional overlay clearing after automatic no-match
 
 - Added a default-off global option to restore the station's original metadata
