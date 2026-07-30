@@ -1,5 +1,16 @@
 # Changelog and failure history
 
+## 2026-07-29 — Unified manual-recognition song boundaries
+
+- Bound pending manual recognition to the song active when it was requested.
+  Both `playlist newsong` and a same-stream metadata change that remains stable
+  for two seconds now complete the request with **Song changed before
+  recognition completed**.
+- A fresh-sample request no longer restarts its collection window and silently
+  recognizes the following song after a committed metadata boundary.
+- Preserved the metadata stability guard, continuous decoder operation, and
+  playback isolation.
+
 ## 2026-07-28 — Linux/macOS runtime portability
 
 - Removed the hard-coded Homebrew Python fallback from recognition workers.

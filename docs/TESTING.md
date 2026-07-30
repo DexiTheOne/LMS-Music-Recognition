@@ -115,8 +115,9 @@ To compare manual sample modes with the same UI or CLI recognition action:
    confirm PCM continues growing and the retry uses the newest configured
    duration once it is available.
 6. With same-stream metadata clearing enabled, cause a metadata change during fresh
-   collection. Confirm PCM clears and the initial wait restarts without FFmpeg
-   stopping.
+   collection. Confirm transient metadata does not cancel the request, but a
+   value that remains stable for two seconds completes it with **Song changed
+   before recognition completed**. FFmpeg must remain running.
 
 The same-stream metadata option is disabled by default. To test it manually:
 
@@ -133,10 +134,12 @@ The same-stream metadata option is disabled by default. To test it manually:
    source label.
 7. Stop playback or select a genuinely new song/station and confirm the old capture is
    invalidated; after a new stream starts, it has a fresh buffer/decoder state.
-8. Trigger recognition during the two-second transition. Confirm the UI reports
-   progress immediately, no worker starts until the transition ends and the
-   configured fresh duration has accumulated, and the retained WAV contains
-   only post-transition PCM.
+8. Trigger recognition before a metadata transition. Confirm the UI reports
+   progress immediately, then a stable metadata change completes the request
+   with **Song changed before recognition completed** rather than carrying the
+   request into the following song. Confirm the same error is returned for a
+   `playlist newsong` boundary and FFmpeg remains running for a same-stream
+   transition.
 
 UI inspection is manual; automated tests must not navigate the browser.
 

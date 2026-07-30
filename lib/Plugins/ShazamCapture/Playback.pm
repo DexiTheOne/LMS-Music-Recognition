@@ -11,6 +11,7 @@ use Time::HiRes qw(time);
 my $log = logger('plugin.shazamcapture');
 my $prefs = preferences('plugin.shazamcapture');
 my (%metadata, %candidate);
+my $song_changed_error = 'Song changed before recognition completed';
 
 sub init {
 	Slim::Control::Request::subscribe(\&_playback_event, [
@@ -24,7 +25,8 @@ sub _playback_event {
 	my $client = $request->client or return;
 	return if Plugins::ShazamCapture::Auto::publishing($client);
 	my $id = lc $client->id;
-	my $event = $request->isCommand([['playlist'], ['stop']]) ? 'stop' : 'new song or station';
+	my $event = $request->isCommand([['playlist'], ['stop']])
+		? 'stop' : $song_changed_error;
 	Plugins::ShazamCapture::Plugin::cancel_recognition($id, $event);
 	Plugins::ShazamCapture::Auto::playback_changed($client, $event);
 
@@ -116,6 +118,9 @@ sub _metadata_commit {
 	)) {
 		$log->info("PCM collection restarted for $id after stable metadata change on the same stream");
 	}
+	Plugins::ShazamCapture::Plugin::cancel_recognition(
+		$id, $song_changed_error, 'manual'
+	);
 }
 
 sub _normalized_metadata {
