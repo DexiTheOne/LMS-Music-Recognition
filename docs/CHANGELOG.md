@@ -4,8 +4,9 @@
 
 - Added a plugin-local 256 px transparent PNG derived from Material Skin's
   `database-search` glyph, centered in white for Jive and Material interfaces.
-- Registered the image as the Shazam History app icon through LMS's
-  `OPMLBased` plugin metadata so LMS serves it from the plugin web path.
+- Registered the image in both `install.xml` and the Shazam History
+  `OPMLBased` app definition. LMS reads Jive and Material app icons from the
+  manifest's plugin metadata rather than the app-definition argument alone.
 
 ## 2026-07-29 — Fresh-only API and CLI recognition trigger
 

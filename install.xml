@@ -4,6 +4,7 @@
   <module>Plugins::ShazamCapture::Plugin</module>
   <description>PLUGIN_SHAZAMCAPTURE_DESC</description>
   <creator>Codex proof of concept</creator>
+  <icon>plugins/ShazamCapture/html/images/shazamcapture.png</icon>
   <version>0.2.0</version>
   <defaultState>enabled</defaultState>
   <type>2</type>
