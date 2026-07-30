@@ -158,6 +158,12 @@ sub command {
 		my $result = start_recognition($client);
 		return _reply($request, $result);
 	}
+	if ($cmd eq 'recognizefresh') {
+		my $result = start_recognition(
+			$client, undef, 'manual', undef, { sample_mode => 'fresh' }
+		);
+		return _reply($request, $result);
+	}
 	my ($encoded, $generation) = Plugins::ShazamCapture::Capture::snapshot($id);
 	my $safe = $id; $safe =~ s/[^a-z0-9]+/_/g;
 	return _reply($request, {ok=>0,stage=>'dump',error=>'Encoded dumps are disabled'})
@@ -175,9 +181,10 @@ sub command {
 }
 
 sub start_recognition {
-	my ($client, $done, $trigger_method, $provenance) = @_;
+	my ($client, $done, $trigger_method, $provenance, $options) = @_;
 	$trigger_method = ($trigger_method || '') eq 'auto' ? 'auto' : 'manual';
 	$provenance = {} unless ref $provenance eq 'HASH';
+	$options = {} unless ref $options eq 'HASH';
 	return {ok=>0,error=>'A player must be selected'} unless $client;
 	my $id = lc $client->id;
 	return {ok=>0,stage=>'automatic',error=>'Automatic recognition owns this radio stream'}
@@ -187,16 +194,20 @@ sub start_recognition {
 	my $mode = Plugins::ShazamCapture::Capture::mode($id, $client);
 	return _mode_error($mode) unless $mode eq 'proxied';
 	my $sample_seconds = _pref_int('sampleSeconds', 5, 30, 10);
-	if ((_manual_sample_mode()) eq 'fresh') {
+	my $sample_mode = ($options->{sample_mode} || '') eq 'fresh'
+		? 'fresh' : _manual_sample_mode();
+	if ($sample_mode eq 'fresh') {
 		return _start_sample_wait(
-			$client, $done, $sample_seconds, 1, $trigger_method, $provenance
+			$client, $done, $sample_seconds, 1, $trigger_method, $provenance,
+			$sample_mode
 		);
 	}
 	my ($bytes, $generation, $pcm_epoch, $pcm_total) =
 		Plugins::ShazamCapture::Capture::snapshot_pcm($id, $sample_seconds);
 	if (length($bytes || '') < $sample_seconds * 32000) {
 		return _start_sample_wait(
-			$client, $done, $sample_seconds, 0, $trigger_method, $provenance
+			$client, $done, $sample_seconds, 0, $trigger_method, $provenance,
+			$sample_mode
 		);
 	}
 	my $safe = $id; $safe =~ s/[^a-z0-9]+/_/g;
@@ -206,18 +217,19 @@ sub start_recognition {
 	my $started = _start_worker(
 		$id, $generation, $path, $done,
 		_history_context($client, Plugins::ShazamCapture::Capture::state($id)),
-		$pcm_epoch, $pcm_total, $sample_seconds, $trigger_method, $provenance
+		$pcm_epoch, $pcm_total, $sample_seconds, $trigger_method, $provenance,
+		$sample_mode
 	);
 	unlink $path unless $started;
 	return $started
-		? {ok=>1,started=>1,generation=>$generation}
+		? {ok=>1,started=>1,generation=>$generation,sample_mode=>$sample_mode}
 		: {ok=>0,stage=>'worker',error=>
 			(Plugins::ShazamCapture::Worker::start_error($id)
 				|| 'Recognition is already running or worker could not start')};
 }
 
 sub _start_sample_wait {
-	my ($client, $done, $sample_seconds, $clear, $trigger_method, $provenance) = @_;
+	my ($client, $done, $sample_seconds, $clear, $trigger_method, $provenance, $sample_mode) = @_;
 	my $id = lc $client->id;
 	Plugins::ShazamCapture::Capture::clear_pcm($id, 'fresh manual identification')
 		if $clear;
@@ -228,7 +240,7 @@ sub _start_sample_wait {
 	my $session = $recognitions{$id} = _new_session(
 		$id, $generation, $done,
 		_history_context($client, Plugins::ShazamCapture::Capture::state($id)),
-		$pcm_epoch, $pcm_total, $trigger_method, $provenance
+		$pcm_epoch, $pcm_total, $trigger_method, $provenance, $sample_mode
 	);
 	$session->{sample_waiting} = 1;
 	$session->{initial_sample_seconds} = $sample_seconds;
@@ -240,7 +252,9 @@ sub _start_sample_wait {
 	Slim::Utils::Timers::setTimer(
 		$session, time() + 0.1, \&_sample_ready, $id
 	);
-	return {ok=>1,started=>1,generation=>$generation};
+	return {
+		ok=>1, started=>1, generation=>$generation, sample_mode=>$sample_mode
+	};
 }
 
 sub _sample_ready {
@@ -291,12 +305,12 @@ sub _sample_ready {
 }
 
 sub _start_worker {
-	my ($id, $generation, $path, $done, $context, $pcm_epoch, $pcm_total, $sample_seconds, $trigger_method, $provenance) = @_;
+	my ($id, $generation, $path, $done, $context, $pcm_epoch, $pcm_total, $sample_seconds, $trigger_method, $provenance, $sample_mode) = @_;
 	$id = lc $id;
 	return 0 if recognition_running($id);
 	my $session = $recognitions{$id} = _new_session(
 		$id, $generation, $done, $context, $pcm_epoch, $pcm_total, $trigger_method,
-		$provenance
+		$provenance, $sample_mode
 	);
 	my $started = _launch_attempt($session, $path, $sample_seconds);
 	if (!$started) {
@@ -307,7 +321,7 @@ sub _start_worker {
 }
 
 sub _new_session {
-	my ($id, $generation, $done, $context, $pcm_epoch, $pcm_total, $trigger_method, $provenance) = @_;
+	my ($id, $generation, $done, $context, $pcm_epoch, $pcm_total, $trigger_method, $provenance, $sample_mode) = @_;
 	$provenance = {} unless ref $provenance eq 'HASH';
 	my $session = {
 		id => $id,
@@ -319,7 +333,8 @@ sub _new_session {
 		trigger_method => ($trigger_method || '') eq 'auto' ? 'auto' : 'manual',
 		api_source => $provenance->{api_source},
 		api_reason => $provenance->{api_reason},
-		sample_mode => _manual_sample_mode(),
+		sample_mode => ($sample_mode || '') eq 'fresh'
+			? 'fresh' : _manual_sample_mode(),
 		attempt => 1,
 		retries => _pref_int('retryCount', 0, 10, 1),
 		confirmations_required => _pref_int('consecutiveConfirmations', 1, 11, 1),

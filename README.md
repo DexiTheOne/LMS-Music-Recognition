@@ -10,10 +10,14 @@ CLI:
     <playerid> shazamcapture reset
     <playerid> shazamcapture dump
     <playerid> shazamcapture recognize
+    <playerid> shazamcapture recognizefresh
     <playerid> shazamcapture history
 
 `recognize` returns immediately with `started: 1`; poll `status` for
-`worker_running` and `last_result`.
+`worker_running` and `last_result`. `recognizefresh` uses the same recognition
+session but always clears the PCM ring and collects a new initial sample,
+regardless of the global manual sample setting. It is intentionally available
+only through CLI and the plugin API; UI buttons continue to use `recognize`.
 
 The global settings page controls the manual identification sample mode,
 initial sample length, number of additional attempts, consecutive match
@@ -46,8 +50,10 @@ Other LMS plugins can start the same asynchronous manual-recognition path
 through `Plugins::ShazamCapture::API`. The caller supplies a physical player
 ID, its plugin identifier, and a completion callback; optional reason, opaque
 callback context, and request ID fields are supported. Successful API matches
-store the caller and reason in history. See [`docs/API.md`](docs/API.md) for
-the complete contract and example.
+store the caller and reason in history. Call `recognize_fresh` instead of
+`recognize` to force collection of a fresh initial sample without changing the
+global setting. See [`docs/API.md`](docs/API.md) for the complete contract and
+example.
 
 Optional automatic recognition is limited to LMS Radio and `hlspl` sources.
 Each physical player has an independent recognition cycle and cooldown. Plugin

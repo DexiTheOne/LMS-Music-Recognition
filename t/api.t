@@ -93,6 +93,11 @@ like(
 is($accepted->{player_id}, $id, 'returns normalized player ID');
 is($Plugins::ShazamCapture::Plugin::start_args[2], 'manual', 'uses manual path');
 is_deeply(
+	$Plugins::ShazamCapture::Plugin::start_args[4],
+	{ sample_mode => undef },
+	'normal API trigger leaves sample mode at the global setting',
+);
+is_deeply(
 	$Plugins::ShazamCapture::Plugin::start_args[3],
 	{
 		api_source => 'Plugins::LikedSongs',
@@ -112,6 +117,19 @@ is($callback[0], $terminal, 'forwards terminal result');
 is($callback[1], $context, 'returns opaque context unchanged');
 is($callback[2]->{request_id}, $accepted->{request_id}, 'returns request metadata');
 is($callback[2]->{generation}, 7, 'returns completed generation');
+
+my $fresh = Plugins::ShazamCapture::API->recognize_fresh(
+	player_id => $id,
+	source    => 'Plugins::LikedSongs',
+	callback  => sub {},
+);
+ok($fresh->{accepted}, 'accepts fresh-only API request');
+is($Plugins::ShazamCapture::Plugin::start_args[2], 'manual', 'fresh API uses manual path');
+is_deeply(
+	$Plugins::ShazamCapture::Plugin::start_args[4],
+	{ sample_mode => 'fresh' },
+	'fresh API forces fresh sampling',
+);
 
 $Plugins::ShazamCapture::Plugin::start_result = {
 	ok => 0,

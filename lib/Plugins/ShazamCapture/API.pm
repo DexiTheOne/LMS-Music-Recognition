@@ -18,6 +18,16 @@ sub available {
 
 sub recognize {
 	my ($class, %args) = @_;
+	return $class->_recognize(undef, %args);
+}
+
+sub recognize_fresh {
+	my ($class, %args) = @_;
+	return $class->_recognize('fresh', %args);
+}
+
+sub _recognize {
+	my ($class, $sample_mode, %args) = @_;
 	my $player_id = _text($args{player_id}, 64);
 	return _rejected('player_id is required') unless length $player_id;
 
@@ -51,6 +61,9 @@ sub recognize {
 		{
 			api_source => $source,
 			api_reason => $reason,
+		},
+		{
+			sample_mode => $sample_mode,
 		},
 	);
 	return {

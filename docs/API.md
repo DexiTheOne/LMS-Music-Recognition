@@ -55,6 +55,28 @@ my $accepted = Plugins::ShazamCapture::API->recognize(
 );
 ```
 
+To force a new initial sample regardless of the global manual sample mode, use
+the otherwise identical API-only trigger:
+
+```perl
+my $accepted = Plugins::ShazamCapture::API->recognize_fresh(
+	player_id => $player_id,
+	source    => 'Plugins::LikedSongs',
+	reason    => 'like',
+	callback  => sub {
+		my ($result, $context, $request) = @_;
+		# Handle the same terminal result contract as recognize().
+	},
+);
+```
+
+`recognize_fresh` clears only the selected player's PCM ring after the request
+passes the common admission checks, then waits for the configured initial
+sample duration. It shares topology validation, automatic-recognition
+exclusion, retries, confirmations, timeouts, stale checks, history recording,
+and callback delivery with `recognize`. It does not alter the global setting.
+There is no corresponding UI button.
+
 Required arguments:
 
 - `player_id`: ID of the physical LMS player whose proxied audio is captured.

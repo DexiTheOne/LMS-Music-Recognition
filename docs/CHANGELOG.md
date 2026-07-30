@@ -1,5 +1,15 @@
 # Changelog and failure history
 
+## 2026-07-29 — Fresh-only API and CLI recognition trigger
+
+- Added `shazamcapture recognizefresh`, which always clears the selected
+  player's PCM ring and collects a new initial sample without changing the
+  global manual sample preference.
+- Added `Plugins::ShazamCapture::API->recognize_fresh` with the same arguments,
+  callback contract, admission checks, retries, confirmations, timeout,
+  history, and provenance handling as the existing API trigger.
+- Kept UI buttons on the existing globally configured manual-recognition path.
+
 ## 2026-07-29 — Unified manual-recognition song boundaries
 
 - Bound pending manual recognition to the song active when it was requested.

@@ -357,6 +357,7 @@ Use the current test player:
 00:04:20:1f:78:65 shazamcapture status
 00:04:20:1f:78:65 shazamcapture reset
 00:04:20:1f:78:65 shazamcapture recognize
+00:04:20:1f:78:65 shazamcapture recognizefresh
 00:04:20:1f:78:65 shazamcapture history limit:25 offset:0
 00:04:20:1f:78:65 shazamcapture dump
 ```
