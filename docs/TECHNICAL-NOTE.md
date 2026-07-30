@@ -99,10 +99,14 @@ normalizes it to a square JPEG, and burns a translucent bottom bar containing
 the original station name into the pixels. Storage is bounded to one
 plugin-local `var/tmp` image per player, atomically replaced on a later match
 and removed when that player's overlay clears. A plugin HTTP handler serves
-the current image with a versioned URL and `no-store`; download, decoding, or
-composition failure falls back to the original remote artwork. If LMS has only
-a raw URL rather than a friendly station title, the label uses
-`Radio - hostname` and never prints the full stream URL into the artwork.
+the current image with a versioned absolute URL derived from LMS's runtime
+server address and `no-store`. The absolute URL is required so LMS core sends
+remote-player and control-UI cover requests through its normal image proxy
+rather than treating the plugin-relative value as a filesystem path.
+Download, decoding, or composition failure falls back to the original remote
+artwork. If LMS has only a raw URL rather than a friendly station title, the
+label uses `Radio - hostname` and never prints the full stream URL into the
+artwork.
 
 Numeric settings must use LMS's enhanced slider-input convention rather than
 raw HTML `type="number"` controls. Use a text input with `stdedit` and a

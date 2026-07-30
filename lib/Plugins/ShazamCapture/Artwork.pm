@@ -8,6 +8,7 @@ use POSIX qw(WNOHANG);
 use Plugins::ShazamCapture::Runtime;
 use Slim::Web::HTTP;
 use Slim::Web::Pages;
+use Slim::Utils::Network;
 use Slim::Utils::Timers;
 
 my $root;
@@ -43,7 +44,8 @@ sub url {
 	my $path = path($id);
 	return unless $path && -f $path;
 	my @stat = stat($path);
-	return '/' . $prefix . _safe($id) . '.jpg?v='
+	return Slim::Utils::Network::serverURL() . '/' . $prefix
+		. _safe($id) . '.jpg?v='
 		. join('-', @stat[1, 7, 9]);
 }
 

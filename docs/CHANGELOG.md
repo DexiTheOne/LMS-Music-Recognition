@@ -2,6 +2,10 @@
 
 ## 2026-07-29 — Station label on automatic artwork
 
+- Published generated covers using LMS's runtime-derived absolute server URL.
+  Relative plugin URLs worked when fetched directly but made LMS's
+  `/music/current/cover...` path treat them as filesystem paths, returning 404
+  to Jive and Material Skin.
 - Added a translucent station-name bar to artwork published by successful
   automatic recognition, preserving the original station identity after song
   metadata and cover art are replaced. Unnamed raw streams fall back to a
