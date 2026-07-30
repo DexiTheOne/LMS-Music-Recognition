@@ -9,6 +9,7 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::Timers;
 use Time::HiRes qw(time);
+use Plugins::ShazamCapture::Artwork;
 
 my $log = logger('plugin.shazamcapture');
 my $prefs = preferences('plugin.shazamcapture');
@@ -154,7 +155,7 @@ sub _tick {
 				&& $current && $current->{generation} == $completed_generation
 				&& eligible($client)
 			) {
-				_publish_overlay($client, $current, $result->{track});
+				_prepare_overlay($client, $current, $result->{track});
 			}
 			elsif (
 				$result->{exhausted_without_valid_match}
@@ -178,6 +179,28 @@ sub _tick {
 	}
 }
 
+sub _prepare_overlay {
+	my ($client, $state, $track) = @_;
+	my $id = lc $client->id;
+	my (undef, $station) = _source($client);
+	$station = _station_label($station);
+	return _publish_overlay($client, $state, $track)
+		unless $track->{artwork_url} && $station;
+	Plugins::ShazamCapture::Artwork->compose(
+		$id, $state->{generation}, $track->{artwork_url}, $station,
+		sub {
+			my ($ready, $generation) = @_;
+			my $current = Plugins::ShazamCapture::Capture::state($id);
+			return unless $current
+				&& $current->{generation} == $generation
+				&& eligible($client);
+			my %published = %$track;
+			$published{station_artwork_ready} = $ready ? 1 : 0;
+			_publish_overlay($client, $current, \%published);
+		}
+	);
+}
+
 sub _publish_overlay {
 	my ($client, $state, $track) = @_;
 	return unless $client && $state && ref $track eq 'HASH';
@@ -186,22 +209,26 @@ sub _publish_overlay {
 	return unless $song;
 	my $old = eval { $song->pluginData('wmaMeta') };
 	$overlay{$id} ||= { song => $song, old => $old };
+	my $artwork_url = $track->{station_artwork_ready}
+		? Plugins::ShazamCapture::Artwork::url($id)
+		: undef;
+	$artwork_url ||= $track->{artwork_url} || '';
 	$overlay{$id}->{track} = {
 		title => $track->{title} || '',
 		artist => $track->{artist} || '',
 		album => $track->{album} || '',
-		artwork_url => $track->{artwork_url} || '',
+		artwork_url => $artwork_url,
 	};
 	my $meta = {
 		title => $track->{title}, artist => $track->{artist},
-		album => $track->{album}, cover => $track->{artwork_url},
+		album => $track->{album}, cover => $artwork_url,
 	};
 	eval { $song->pluginData(wmaMeta => $meta) };
 	for my $url (grep { defined $_ && length $_ } (
 		$state->{url}, eval { $song->track->url }, eval { $song->currentTrack->url }
 	)) {
-		$cache->set("remote_image_$url", $track->{artwork_url}, 86400)
-			if $track->{artwork_url};
+		$cache->set("remote_image_$url", $artwork_url, 86400)
+			if $artwork_url;
 	}
 	$client->metaTitle(join(' - ', grep { defined $_ && length $_ }
 		($track->{artist}, $track->{title})));
@@ -221,6 +248,7 @@ sub clear_overlay {
 	my ($client, $reason) = @_;
 	return unless $client;
 	my $id = lc $client->id;
+	Plugins::ShazamCapture::Artwork::clear($id);
 	my $saved = delete $overlay{$id} or return;
 	my $song = $saved->{song};
 	eval { $song->pluginData(wmaMeta => $saved->{old}) } if $song;
@@ -270,6 +298,20 @@ sub _normalize {
 	$value =~ s/^\s+|\s+$//g;
 	$value =~ s/\s+/ /g;
 	return $value;
+}
+
+sub _station_label {
+	my ($station) = @_;
+	$station = '' unless defined $station;
+	$station =~ s/^\s+|\s+$//g;
+	$station =~ s/\s+/ /g;
+	return '' unless length $station;
+	if ($station =~ m{^[a-z][a-z0-9+.-]*://([^/:?#]+)}i) {
+		my $host = lc $1;
+		$host =~ s/^www\.//;
+		return "Radio - $host";
+	}
+	return $station;
 }
 
 sub _cooldown {

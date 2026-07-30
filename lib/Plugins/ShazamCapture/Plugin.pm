@@ -16,6 +16,7 @@ use Slim::Utils::Timers;
 
 use Plugins::ShazamCapture::Capture;
 use Plugins::ShazamCapture::Decoder;
+use Plugins::ShazamCapture::Artwork;
 use Plugins::ShazamCapture::History;
 use Plugins::ShazamCapture::HistoryUI;
 use Plugins::ShazamCapture::Hook;
@@ -56,6 +57,7 @@ sub initPlugin {
 	$root = File::Spec->rel2abs(File::Spec->catdir(dirname(__FILE__), qw(.. .. ..)));
 	make_path(File::Spec->catdir($root, 'var', $_)) for qw(tmp dumps logs);
 	Plugins::ShazamCapture::Runtime::init($root);
+	Plugins::ShazamCapture::Artwork->init($root);
 	Plugins::ShazamCapture::Decoder::init($root);
 	$prefs->init({
 		saveDebugWav => 0,

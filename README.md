@@ -61,7 +61,12 @@ sources such as Spotty are excluded. A comma-separated station ignore list can
 disable automatic sampling by LMS station name. When the separate metadata
 overlay option is enabled, successful automatic samples temporarily replace
 the radio title, artist, album, and artwork; manual samples never publish an
-overlay. A separate default-off option restores the station's original metadata
+overlay. Recognized artwork includes a translucent bottom bar naming the
+original radio station. The plugin keeps only one generated JPEG per player,
+overwrites it on the next match, and removes it when the overlay is cleared.
+For an unnamed raw stream, the bar identifies its host instead of displaying
+the full URL. If artwork composition fails, the unmodified Shazam artwork is
+used. A separate default-off option restores the station's original metadata
 when every attempt in an automatic sequence returns no match. The next
 successful automatic sequence publishes a new overlay.
 

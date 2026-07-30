@@ -1,5 +1,18 @@
 # Changelog and failure history
 
+## 2026-07-29 — Station label on automatic artwork
+
+- Added a translucent station-name bar to artwork published by successful
+  automatic recognition, preserving the original station identity after song
+  metadata and cover art are replaced. Unnamed raw streams fall back to a
+  concise `Radio - hostname` label instead of exposing the full stream URL.
+- Kept generated storage bounded to one JPEG per player under `var/tmp`.
+  Images are atomically overwritten on later matches, removed when overlays
+  clear and at plugin startup, and served through a versioned plugin-local URL
+  without an accumulating artwork cache.
+- Kept composition in a separate external worker and retained the original Shazam
+  artwork as a fail-safe if downloading or rendering the labeled image fails.
+
 ## 2026-07-29 — Jive and Material app icon
 
 - Added a plugin-local 256 px transparent PNG derived from Material Skin's

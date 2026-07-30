@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import urllib.request
 from datetime import datetime
 from urllib.parse import urlsplit, urlunsplit
 
@@ -89,6 +90,81 @@ def clean_spotify_url(url):
         return None
     return urlunsplit(("https", "open.spotify.com", parts.path, "", ""))
 
+def compose_station_artwork(source, station, output, ffmpeg, timeout):
+    if not source or not station or not output or not inside(output):
+        return False
+    tmp_dir = os.path.join(PLUGIN_ROOT, "var", "tmp")
+    text_fd, text_path = tempfile.mkstemp(prefix="artwork_text_", suffix=".txt", dir=tmp_dir)
+    output_fd, staged = tempfile.mkstemp(prefix="artwork_staged_", suffix=".jpg", dir=tmp_dir)
+    os.close(output_fd)
+    try:
+        label = " ".join(str(station).split())[:80]
+        with os.fdopen(text_fd, "w", encoding="utf-8") as text:
+            text.write(label)
+        font_size = max(32, min(66, int(1800 / max(len(label), 1))))
+        escaped_text_path = text_path.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+        vf = (
+            "scale=1200:1200:force_original_aspect_ratio=decrease,"
+            "pad=1200:1200:(ow-iw)/2:(oh-ih)/2:black,"
+            "drawbox=x=0:y=ih*0.84:w=iw:h=ih*0.16:color=black@0.72:t=fill,"
+            f"drawtext=textfile='{escaped_text_path}':fontcolor=white:"
+            f"fontsize={font_size}:x=(w-text_w)/2:y=h*0.92-text_h/2"
+        )
+        proc = subprocess.run(
+            [ffmpeg, "-hide_banner", "-loglevel", "error", "-i", source,
+             "-vf", vf, "-frames:v", "1", "-q:v", "3", "-y", staged],
+            capture_output=True, timeout=min(timeout, 8), check=False
+        )
+        if proc.returncode or not os.path.getsize(staged):
+            return False
+        os.replace(staged, output)
+        return True
+    except Exception as exc:
+        print(f"Unable to compose station artwork: {type(exc).__name__}", file=sys.stderr)
+        return False
+    finally:
+        for path in (text_path, staged):
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+
+def station_artwork(artwork_url, station, output, ffmpeg, timeout):
+    if not artwork_url or not station or not output or not inside(output):
+        return False
+    if urlsplit(artwork_url).scheme not in ("http", "https"):
+        return False
+    tmp_dir = os.path.join(PLUGIN_ROOT, "var", "tmp")
+    source_fd, source = tempfile.mkstemp(prefix="artwork_source_", dir=tmp_dir)
+    os.close(source_fd)
+    try:
+        request = urllib.request.Request(
+            artwork_url, headers={"User-Agent": "Lyrion Music Server Shazam Capture"}
+        )
+        with urllib.request.urlopen(request, timeout=min(timeout, 8)) as response:
+            content_type = response.headers.get_content_type()
+            if not content_type.startswith("image/"):
+                return False
+            with open(source, "wb") as image:
+                remaining = 15 * 1024 * 1024
+                while remaining:
+                    chunk = response.read(min(65536, remaining))
+                    if not chunk:
+                        break
+                    image.write(chunk)
+                    remaining -= len(chunk)
+                if response.read(1):
+                    return False
+        return compose_station_artwork(source, station, output, ffmpeg, timeout)
+    except Exception as exc:
+        print(f"Unable to download station artwork: {type(exc).__name__}", file=sys.stderr)
+        return False
+    finally:
+        try:
+            os.unlink(source)
+        except OSError:
+            pass
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--input", required=True)
@@ -147,12 +223,13 @@ def main():
             apple_music_url = first_uri(hub.get("options"))
         apple_music_url = clean_url(apple_music_url)
         spotify = spotify_url(hub.get("providers"))
+        artwork_url = images.get("coverart") or images.get("coverarthq")
         emit({"ok":True,"matched":True,"track":{
             "title":track.get("title"),"artist":track.get("subtitle"),
             "album":metadata_value(track, {"album"}),
             "apple_music_url":apple_music_url,
             "spotify_url":spotify,
-            "artwork_url":images.get("coverart") or images.get("coverarthq"),
+            "artwork_url":artwork_url,
             "shazam_url":track.get("url"),
             "shazam_key":track.get("key")},"matches":len(matches)})
     finally:
