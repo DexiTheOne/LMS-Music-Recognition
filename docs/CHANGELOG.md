@@ -2,6 +2,11 @@
 
 ## 2026-07-29 — Station label on automatic artwork
 
+- Treated the helper's atomic output replacement as the authoritative
+  composition-success signal. LMS could reap the short-lived artwork child
+  before the plugin timer observed its exit status, causing a successfully
+  generated overlay JPEG to be ignored and the original Shazam URL to be
+  published instead.
 - Published generated covers using LMS's runtime-derived absolute server URL.
   Relative plugin URLs worked when fetched directly but made LMS's
   `/music/current/cover...` path treat them as filesystem paths, returning 404

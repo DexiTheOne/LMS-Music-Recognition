@@ -74,6 +74,7 @@ sub compose {
 	return $done->(0, $generation) unless $python;
 	my $helper = File::Spec->catfile($root, 'python', 'artwork.py');
 	my $output = path($id);
+	my $previous = _identity($output);
 	my $pid = fork();
 	return $done->(0, $generation) unless defined $pid;
 	if (!$pid) {
@@ -90,7 +91,7 @@ sub compose {
 	}
 	$jobs{$id} = {
 		pid => $pid, generation => $generation, output => $output,
-		done => $done, started => time(),
+		previous => $previous, done => $done, started => time(),
 	};
 	Slim::Utils::Timers::setTimer($class, time() + 0.1, \&_poll, $id);
 }
@@ -107,7 +108,12 @@ sub _poll {
 		kill 'TERM', $job->{pid};
 		waitpid($job->{pid}, 0);
 	}
-	my $ok = $ended > 0 && $? == 0 && -f $job->{output};
+	# LMS can reap short-lived children before this timer observes their exit
+	# status. The helper only atomically replaces the destination after the
+	# complete image has been downloaded, decoded, and rendered, so a changed
+	# file identity is the authoritative success signal.
+	my $current = _identity($job->{output});
+	my $ok = $current && $current ne ($job->{previous} || '');
 	delete $jobs{$id};
 	$job->{done}->($ok ? 1 : 0, $job->{generation});
 }
@@ -157,6 +163,13 @@ sub _safe {
 	my $safe = lc($id || '');
 	$safe =~ s/[^a-z0-9]+/_/g;
 	return $safe;
+}
+
+sub _identity {
+	my ($path) = @_;
+	return '' unless $path && -f $path;
+	my @stat = stat($path);
+	return join('-', @stat[1, 7, 9]);
 }
 
 1;

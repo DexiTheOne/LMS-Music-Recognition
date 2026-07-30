@@ -108,6 +108,12 @@ artwork. If LMS has only a raw URL rather than a friendly station title, the
 label uses `Radio - hostname` and never prints the full stream URL into the
 artwork.
 
+The atomic destination replacement is also the authoritative completion
+signal. LMS can reap a short-lived artwork child before its timer observes the
+process exit status; a changed file identity is safe to accept because the
+helper performs the rename only after download, decode, text rendering, and
+JPEG output have all completed successfully.
+
 Numeric settings must use LMS's enhanced slider-input convention rather than
 raw HTML `type="number"` controls. Use a text input with `stdedit` and a
 `sliderInput_MIN_MAX_STEP` class, for example:
