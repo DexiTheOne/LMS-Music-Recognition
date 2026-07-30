@@ -85,6 +85,8 @@ SQL
 	_add_column('artwork_url', 'TEXT');
 	_add_column('shazam_url', 'TEXT');
 	_add_column('trigger_method', 'TEXT');
+	_add_column('api_source', 'TEXT');
+	_add_column('api_reason', 'TEXT');
 	$dbh->do("UPDATE recognition_history SET trigger_method='manual' "
 		. "WHERE trigger_method IS NULL OR trigger_method=''");
 	_clean_stored_apple_urls();
@@ -245,13 +247,14 @@ sub _clean_stored_spotify_urls {
 }
 
 sub record {
-	my ($player_id, $generation, $result, $context, $trigger_method) = @_;
+	my ($player_id, $generation, $result, $context, $trigger_method, $provenance) = @_;
 	die 'recognition history is not initialized' unless $dbh;
 	$result ||= {};
 	return unless $result->{ok} && $result->{matched};
 	my $track = ref $result->{track} eq 'HASH' ? $result->{track} : {};
 	return unless defined $track->{title} && length $track->{title};
 	$context ||= {};
+	$provenance ||= {};
 	my $recognized_at = int($context->{recognized_at} || time());
 	my $last = $dbh->selectrow_hashref(
 		'SELECT recognized_at,title,artist,album,shazam_key FROM recognition_history '
@@ -267,8 +270,9 @@ sub record {
 		'INSERT INTO recognition_history '
 		. '(recognized_at,player_id,generation,ok,matched,stale,title,artist,album,'
 		. 'shazam_key,stage,error,result_json,player_name,source_name,source_url,'
-		. 'technical_source,apple_music_url,spotify_url,artwork_url,shazam_url,trigger_method) '
-		. 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+		. 'technical_source,apple_music_url,spotify_url,artwork_url,shazam_url,'
+		. 'trigger_method,api_source,api_reason) '
+		. 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
 		undef,
 		$recognized_at, $player_id, int($generation || 0),
 		$result->{ok} ? 1 : 0,
@@ -281,6 +285,7 @@ sub record {
 		_clean_url($track->{apple_music_url}), _clean_spotify_url($track->{spotify_url}),
 		$track->{artwork_url}, $track->{shazam_url},
 		($trigger_method || '') eq 'auto' ? 'auto' : 'manual',
+		$provenance->{api_source}, $provenance->{api_reason},
 	);
 	return $dbh->sqlite_last_insert_rowid();
 }
@@ -311,7 +316,8 @@ sub recent {
 	my $rows = $dbh->selectall_arrayref(
 		'SELECT id,recognized_at,player_id,generation,ok,matched,stale,title,artist,'
 		. 'album,shazam_key,stage,error,player_name,source_name,source_url,'
-		. 'technical_source,apple_music_url,spotify_url,artwork_url,shazam_url,trigger_method FROM recognition_history '
+		. 'technical_source,apple_music_url,spotify_url,artwork_url,shazam_url,'
+		. 'trigger_method,api_source,api_reason FROM recognition_history '
 		. 'WHERE ok=1 AND matched=1 '
 		. 'ORDER BY recognized_at DESC,id DESC LIMIT ? OFFSET ?',
 		{ Slice => {} }, $limit, $offset,
@@ -482,7 +488,9 @@ sub _all_matches_from_handle {
 	my $rows = $handle->selectall_arrayref(
 		'SELECT id,recognized_at,player_id,generation,title,artist,album,shazam_key,'
 		. 'player_name,source_name,source_url,technical_source,apple_music_url,'
-		. 'spotify_url,artwork_url,shazam_url,trigger_method '
+		. 'spotify_url,artwork_url,shazam_url,trigger_method,'
+		. _optional_column($handle, 'api_source') . ','
+		. _optional_column($handle, 'api_reason') . ' '
 		. 'FROM recognition_history WHERE ' . join(' AND ', @where)
 		. " ORDER BY $order",
 		{ Slice => {} },
@@ -497,6 +505,15 @@ sub _all_matches_from_handle {
 		);
 	}
 	return $rows;
+}
+
+sub _optional_column {
+	my ($handle, $name) = @_;
+	my $columns = $handle->selectall_arrayref(
+		'PRAGMA table_info(recognition_history)', { Slice => {} }
+	);
+	return $name if grep { $_->{name} eq $name } @$columns;
+	return "NULL AS $name";
 }
 
 sub path {

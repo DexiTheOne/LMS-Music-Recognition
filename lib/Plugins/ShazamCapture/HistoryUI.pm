@@ -141,6 +141,8 @@ sub _history_item {
 	_detail(\@details, 'Recognized', $row->{recognized_at_local});
 	_detail(\@details, 'Sample type',
 		($row->{trigger_method} || 'manual') eq 'auto' ? 'Auto Sample' : 'Manual Sample');
+	_detail(\@details, 'API caller', $row->{api_source});
+	_detail(\@details, 'API reason', $row->{api_reason});
 	_detail_link(\@details, 'Apple Music', $row->{apple_music_url});
 	if ($prefs->get('showSpotifyInHistory')) {
 		if ($row->{spotify_url}) {

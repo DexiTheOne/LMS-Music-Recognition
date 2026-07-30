@@ -580,3 +580,17 @@ diagnostic input and is no longer the recognition snapshot.
 The development LMS log contains ShairTunes/CryptX and SpotOn errors unrelated
 to this plugin. Attribute failures by package name and surrounding timestamp;
 do not modify those plugins.
+# 0.2.0
+
+- Added the versioned `Plugins::ShazamCapture::API` asynchronous recognition
+  facade for other LMS plugins.
+- API recognition resolves a caller-supplied physical player ID and delegates
+  to the existing manual UI path, including automatic-recognition exclusion,
+  sample settings, retries, confirmation, timeout, and stale-result handling.
+- Added optional reason, opaque callback context, and caller-supplied request
+  ID support. A request ID is generated when omitted.
+- Added additive `api_source` and `api_reason` recognition-history columns and
+  corresponding history detail rows. Caller context and request IDs are never
+  persisted.
+- Documented API availability, acceptance, completion, errors, result
+  validation, and automatic-recognition interaction in `docs/API.md`.

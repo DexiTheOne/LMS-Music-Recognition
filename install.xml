@@ -4,7 +4,7 @@
   <module>Plugins::ShazamCapture::Plugin</module>
   <description>PLUGIN_SHAZAMCAPTURE_DESC</description>
   <creator>Codex proof of concept</creator>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <defaultState>enabled</defaultState>
   <type>2</type>
   <targetApplication>

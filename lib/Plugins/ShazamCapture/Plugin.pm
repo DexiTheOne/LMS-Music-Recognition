@@ -175,8 +175,9 @@ sub command {
 }
 
 sub start_recognition {
-	my ($client, $done, $trigger_method) = @_;
+	my ($client, $done, $trigger_method, $provenance) = @_;
 	$trigger_method = ($trigger_method || '') eq 'auto' ? 'auto' : 'manual';
+	$provenance = {} unless ref $provenance eq 'HASH';
 	return {ok=>0,error=>'A player must be selected'} unless $client;
 	my $id = lc $client->id;
 	return {ok=>0,stage=>'automatic',error=>'Automatic recognition owns this radio stream'}
@@ -187,12 +188,16 @@ sub start_recognition {
 	return _mode_error($mode) unless $mode eq 'proxied';
 	my $sample_seconds = _pref_int('sampleSeconds', 5, 30, 10);
 	if ((_manual_sample_mode()) eq 'fresh') {
-		return _start_sample_wait($client, $done, $sample_seconds, 1, $trigger_method);
+		return _start_sample_wait(
+			$client, $done, $sample_seconds, 1, $trigger_method, $provenance
+		);
 	}
 	my ($bytes, $generation, $pcm_epoch, $pcm_total) =
 		Plugins::ShazamCapture::Capture::snapshot_pcm($id, $sample_seconds);
 	if (length($bytes || '') < $sample_seconds * 32000) {
-		return _start_sample_wait($client, $done, $sample_seconds, 0, $trigger_method);
+		return _start_sample_wait(
+			$client, $done, $sample_seconds, 0, $trigger_method, $provenance
+		);
 	}
 	my $safe = $id; $safe =~ s/[^a-z0-9]+/_/g;
 	my $path = File::Spec->catfile($root,'var','tmp',sprintf('%s_%d_%d.s16le',$safe,$generation,int(rand(1e9))));
@@ -201,7 +206,7 @@ sub start_recognition {
 	my $started = _start_worker(
 		$id, $generation, $path, $done,
 		_history_context($client, Plugins::ShazamCapture::Capture::state($id)),
-		$pcm_epoch, $pcm_total, $sample_seconds, $trigger_method
+		$pcm_epoch, $pcm_total, $sample_seconds, $trigger_method, $provenance
 	);
 	unlink $path unless $started;
 	return $started
@@ -212,7 +217,7 @@ sub start_recognition {
 }
 
 sub _start_sample_wait {
-	my ($client, $done, $sample_seconds, $clear, $trigger_method) = @_;
+	my ($client, $done, $sample_seconds, $clear, $trigger_method, $provenance) = @_;
 	my $id = lc $client->id;
 	Plugins::ShazamCapture::Capture::clear_pcm($id, 'fresh manual identification')
 		if $clear;
@@ -223,7 +228,7 @@ sub _start_sample_wait {
 	my $session = $recognitions{$id} = _new_session(
 		$id, $generation, $done,
 		_history_context($client, Plugins::ShazamCapture::Capture::state($id)),
-		$pcm_epoch, $pcm_total, $trigger_method
+		$pcm_epoch, $pcm_total, $trigger_method, $provenance
 	);
 	$session->{sample_waiting} = 1;
 	$session->{initial_sample_seconds} = $sample_seconds;
@@ -286,11 +291,12 @@ sub _sample_ready {
 }
 
 sub _start_worker {
-	my ($id, $generation, $path, $done, $context, $pcm_epoch, $pcm_total, $sample_seconds, $trigger_method) = @_;
+	my ($id, $generation, $path, $done, $context, $pcm_epoch, $pcm_total, $sample_seconds, $trigger_method, $provenance) = @_;
 	$id = lc $id;
 	return 0 if recognition_running($id);
 	my $session = $recognitions{$id} = _new_session(
-		$id, $generation, $done, $context, $pcm_epoch, $pcm_total, $trigger_method
+		$id, $generation, $done, $context, $pcm_epoch, $pcm_total, $trigger_method,
+		$provenance
 	);
 	my $started = _launch_attempt($session, $path, $sample_seconds);
 	if (!$started) {
@@ -301,7 +307,8 @@ sub _start_worker {
 }
 
 sub _new_session {
-	my ($id, $generation, $done, $context, $pcm_epoch, $pcm_total, $trigger_method) = @_;
+	my ($id, $generation, $done, $context, $pcm_epoch, $pcm_total, $trigger_method, $provenance) = @_;
+	$provenance = {} unless ref $provenance eq 'HASH';
 	my $session = {
 		id => $id,
 		generation => $generation,
@@ -310,6 +317,8 @@ sub _new_session {
 		done => $done,
 		context => $context,
 		trigger_method => ($trigger_method || '') eq 'auto' ? 'auto' : 'manual',
+		api_source => $provenance->{api_source},
+		api_reason => $provenance->{api_reason},
 		sample_mode => _manual_sample_mode(),
 		attempt => 1,
 		retries => _pref_int('retryCount', 0, 10, 1),
@@ -548,7 +557,10 @@ sub _finish_recognition {
 	eval {
 		Plugins::ShazamCapture::History::record(
 			$id, $session->{generation}, $result, $session->{context}
-			, $session->{trigger_method}
+			, $session->{trigger_method}, {
+				api_source => $session->{api_source},
+				api_reason => $session->{api_reason},
+			}
 		)
 	};
 	$log->error("could not record recognition history: $@") if $@;
@@ -560,6 +572,10 @@ sub recognition_running {
 	my ($id) = @_;
 	$id = lc $id;
 	return ($recognitions{$id} || Plugins::ShazamCapture::Worker::running($id)) ? 1 : 0;
+}
+
+sub initialized {
+	return defined $root && length $root ? 1 : 0;
 }
 
 sub cancel_recognition {

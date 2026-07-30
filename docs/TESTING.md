@@ -1,5 +1,18 @@
 # Terminal test procedures
 
+## Plugin API contract
+
+Run the isolated API contract test without playback or network access:
+
+```bash
+perl -Ilib t/api.t
+```
+
+It verifies required arguments, generated request IDs, physical-player
+resolution, use of the manual recognition path, provenance sanitization,
+opaque context delivery, terminal callback metadata, and propagation of the
+automatic-recognition rejection.
+
 ## Boundaries
 
 These procedures use terminal access only. An agent may inspect logs, issue

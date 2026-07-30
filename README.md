@@ -42,6 +42,13 @@ maximum page size is 500.
 Recognition artwork is not stored locally. Recognition audio is not stored
 unless the global debug WAV setting is enabled.
 
+Other LMS plugins can start the same asynchronous manual-recognition path
+through `Plugins::ShazamCapture::API`. The caller supplies a physical player
+ID, its plugin identifier, and a completion callback; optional reason, opaque
+callback context, and request ID fields are supported. Successful API matches
+store the caller and reason in history. See [`docs/API.md`](docs/API.md) for
+the complete contract and example.
+
 Optional automatic recognition is limited to LMS Radio and `hlspl` sources.
 Each physical player has an independent recognition cycle and cooldown. Plugin
 sources such as Spotty are excluded. A comma-separated station ignore list can
@@ -63,8 +70,9 @@ field uses LMS's built-in file selector filtered to `.sqlite3` files. A valid
 absolute picker result is saved in plugin-relative form. The active backup
 path, scope, filter, and sort appear above the history rows.
 Selecting a song opens its full metadata, source, player, time, sample type,
-and external links. Missing artwork uses LMS's default cover image, and missing
-Spotify results are labeled **No Spotify Link Returned**.
+API caller and reason when applicable, and external links. Missing artwork
+uses LMS's default cover image, and missing Spotify results are labeled
+**No Spotify Link Returned**.
 
 Apple Music and Spotify URLs are normalized before storage. Tracking query
 parameters and fragments are removed; Spotify app and intent links are
