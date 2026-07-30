@@ -47,6 +47,7 @@ sub initPlugin {
 		tag    => 'shazamhistory',
 		weight => 75,
 		is_app => 1,
+		icon   => 'plugins/ShazamCapture/html/images/shazamcapture.png',
 	);
 	if (main::WEBUI) {
 		Plugins::ShazamCapture::Settings->new;

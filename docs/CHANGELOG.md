@@ -1,5 +1,12 @@
 # Changelog and failure history
 
+## 2026-07-29 — Jive and Material app icon
+
+- Added a plugin-local 256 px transparent PNG derived from Material Skin's
+  `database-search` glyph, centered in white for Jive and Material interfaces.
+- Registered the image as the Shazam History app icon through LMS's
+  `OPMLBased` plugin metadata so LMS serves it from the plugin web path.
+
 ## 2026-07-29 — Fresh-only API and CLI recognition trigger
 
 - Added `shazamcapture recognizefresh`, which always clears the selected
