@@ -462,8 +462,13 @@ sub _all_matches_from_handle {
 		title   => 'title',
 		album   => 'album',
 		capture => 'trigger_method',
+		api_source => 'api_source',
+		api_reason => 'api_reason',
 	);
 	my $filter_column = $filter_columns{$options->{filter_field} || ''};
+	$filter_column = 'NULL'
+		if $filter_column && $filter_column =~ /^api_/
+			&& !_has_column($handle, $filter_column);
 	my $filter_value = $options->{filter_value};
 	if ($filter_column && defined $filter_value && length $filter_value) {
 		$filter_value = lc $filter_value;
@@ -509,11 +514,16 @@ sub _all_matches_from_handle {
 
 sub _optional_column {
 	my ($handle, $name) = @_;
+	return $name if _has_column($handle, $name);
+	return "NULL AS $name";
+}
+
+sub _has_column {
+	my ($handle, $name) = @_;
 	my $columns = $handle->selectall_arrayref(
 		'PRAGMA table_info(recognition_history)', { Slice => {} }
 	);
-	return $name if grep { $_->{name} eq $name } @$columns;
-	return "NULL AS $name";
+	return grep { $_->{name} eq $name } @$columns;
 }
 
 sub path {

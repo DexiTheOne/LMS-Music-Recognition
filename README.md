@@ -62,7 +62,8 @@ successful automatic sequence publishes a new overlay.
 The LMS **My Apps** menu includes **Shazam History**. Each player's plugin
 settings can independently limit the view to that player, apply a
 case-insensitive text filter by station, stream source, artist, song title,
-album, or capture type, and choose chronological or alphabetical ordering.
+album, capture type, API caller, or API reason, and choose chronological or
+alphabetical ordering.
 The per-player page can also point the view at a plugin-local `.sqlite3`
 snapshot, normally beneath `var/backups`; snapshots are opened strictly
 read-only while recognition continues writing to the active database. The path

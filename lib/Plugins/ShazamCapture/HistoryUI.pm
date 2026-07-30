@@ -90,6 +90,8 @@ sub _subtitle {
 		title   => 'Song title',
 		album   => 'Album',
 		capture => 'Capture type',
+		api_source => 'API caller',
+		api_reason => 'API reason',
 	);
 	my $filter = 'No filter';
 	if ($filter_labels{$filter_field || ''} && length $filter_value) {

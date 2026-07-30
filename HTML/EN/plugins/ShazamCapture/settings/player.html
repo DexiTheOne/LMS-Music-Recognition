@@ -53,6 +53,12 @@
 			<option value="capture" [% IF prefs.historyFilterField == "capture" %]selected="selected"[% END %]>
 				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_CAPTURE" | string %]
 			</option>
+			<option value="api_source" [% IF prefs.historyFilterField == "api_source" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_API_SOURCE" | string %]
+			</option>
+			<option value="api_reason" [% IF prefs.historyFilterField == "api_reason" %]selected="selected"[% END %]>
+				[% "PLUGIN_SHAZAMCAPTURE_HISTORY_FILTER_API_REASON" | string %]
+			</option>
 		</select>
 	[% END %]
 

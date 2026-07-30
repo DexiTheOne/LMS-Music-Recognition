@@ -86,7 +86,9 @@ web UI:
     incompatible databases, and symlinks resolving outside the plugin produce
     a concise history error without changing the active database.
 22. Confirm **No filter** disables the value field, while choosing Station,
-    Stream source, Artist, Song title, Album, or Capture type enables it.
+    Stream source, Artist, Song title, Album, Capture type, API caller, or API
+    reason enables it. Confirm API filters find matching API-triggered records
+    and safely show no matches for older backups without API columns.
 23. Save a Station filter such as `The Wave` with **Newest to Oldest** and
     confirm those values remain selected for that player only.
 24. Open **My Apps → Shazam History** and confirm the summary reads like

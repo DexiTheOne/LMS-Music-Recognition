@@ -54,7 +54,7 @@ sub handler {
 			unless defined $params->{pref_historyUseCurrentDatabase};
 
 		my %filter = map { $_ => 1 }
-			qw(none station source artist title album capture);
+			qw(none station source artist title album capture api_source api_reason);
 		$params->{pref_historyFilterField} = 'none'
 			unless $filter{$params->{pref_historyFilterField} || ''};
 

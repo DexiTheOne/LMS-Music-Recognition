@@ -594,3 +594,6 @@ do not modify those plugins.
   persisted.
 - Documented API availability, acceptance, completion, errors, result
   validation, and automatic-recognition interaction in `docs/API.md`.
+- Added API caller and API reason to the per-player history filter dropdown,
+  including safe no-match behavior for older backup databases without those
+  additive columns.
