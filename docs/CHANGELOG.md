@@ -9,6 +9,9 @@
 - Recognize LMS image-proxy encoded plugin artwork as overlay-owned metadata.
   Encoded plugin artwork and cache entries are no longer saved as native
   station state and restored after a no-match.
+- Restore the saved station title as explicit remote metadata when no
+  trustworthy native metadata existed. This prevents LMS's cached recognized
+  current-title fallback from immediately reappearing after the clear.
 
 ## 2026-08-10 — Restore station metadata after clearing a residual overlay
 

@@ -234,7 +234,9 @@ sub _publish_overlay {
 	my $song = eval { $client->playingSong } || eval { $client->streamingSong };
 	return unless $song;
 	my $old = eval { $song->pluginData('wmaMeta') };
-	$old = undef if _plugin_owned_meta($old);
+	$old = undef if _plugin_owned_meta($old) || _same_track_meta($old, $track);
+	my (undef, $station) = _source($client);
+	$station = _station_label($station);
 	my @urls = grep { defined $_ && length $_ } (
 		$state->{url}, eval { $song->track->url }, eval { $song->currentTrack->url }
 	);
@@ -245,7 +247,8 @@ sub _publish_overlay {
 			$key => (_plugin_owned_artwork($old_image) ? undef : $old_image)
 		} @urls;
 		$overlay{$id} = {
-			song => $song, old => $old, old_images => \%old_images,
+			song => $song, old => $old, station => $station,
+			old_images => \%old_images,
 		};
 	}
 	my $artwork_url = $track->{station_artwork_ready}
@@ -303,7 +306,14 @@ sub clear_overlay {
 		}
 		my $current = eval { $song->pluginData('wmaMeta') };
 		next unless $saved || _plugin_owned_meta($current);
-		eval { $song->pluginData(wmaMeta => ($saved ? $saved->{old} : undef)) };
+		my $restore = $saved && $saved->{old};
+		my $station = $saved && $saved->{station};
+		if (!$restore && !$station) {
+			(undef, $station) = _source($client);
+			$station = _station_label($station);
+		}
+		$restore = { title => $station } if !$restore && $station;
+		eval { $song->pluginData(wmaMeta => $restore) };
 		$cleared = 1;
 	}
 	return unless $saved || $cleared;
@@ -341,6 +351,14 @@ sub _plugin_owned_artwork {
 	return 1 if $url =~ m{/plugins/ShazamCapture/artwork/}i;
 	return 1 if $url =~ m{%2fplugins%2fShazamCapture%2fartwork%2f}i;
 	return 0;
+}
+
+sub _same_track_meta {
+	my ($meta, $track) = @_;
+	return 0 unless ref $meta eq 'HASH' && ref $track eq 'HASH';
+	return 0 unless ($meta->{title} || '') eq ($track->{title} || '');
+	return 0 unless ($meta->{artist} || '') eq ($track->{artist} || '');
+	return 1;
 }
 
 sub _source {

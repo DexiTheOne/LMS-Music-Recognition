@@ -9,6 +9,8 @@ artwork disappear and the station's native title/artwork can show again. This
 must also work after LMS has refreshed its internal song object during the same
 continuous stream and when LMS reports the plugin artwork through an
 `/imageproxy/...%2Fplugins%2FShazamCapture%2Fartwork...` URL.
+Confirm the status response contains the station title after removal rather
+than falling back to the last recognized song title.
 
 ## Plugin API contract
 
