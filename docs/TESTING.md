@@ -38,11 +38,10 @@ web UI:
    this option; after all configured attempts return no match, confirm the
    original station metadata returns. Confirm the next successful automatic
    sequence publishes its recognized metadata again.
-5. With **Accept the first match after two no-results** disabled, confirm an
-   exhausted no-match, a stopped retry sequence, and a worker or recognition
-   failure each clear the overlay. Confirm a stale result does not clear it.
-   Enable the confirmation bypass and confirm each unsuccessful automatic
-   outcome preserves the overlay.
+5. Confirm an exhausted no-match, a stopped retry sequence, and a worker or
+   recognition failure each clear the overlay. Enable **Accept the first match
+   after two no-results** and repeat an unsuccessful sequence; confirm it still
+   clears the overlay. Confirm a stale result does not clear it.
 6. Confirm all five numeric controls render as LMS/MUI-style sliders rather
    than browser-native number boxes.
 7. Save boundary values and confirm they persist: sample lengths 5–30 seconds,

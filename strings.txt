@@ -131,7 +131,7 @@ PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH
 	EN	Remove recognition overlay after unsuccessful automatic recognition
 
 PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH_DESC
-	EN	Restore the station's original metadata when an automatic sequence ends without a valid confirmed song, including no-matches, stopped retries, and recognition failures. A later successful automatic recognition publishes the overlay again. The overlay remains when Accept the first match after two no-results is enabled. Stale samples and manual recognition do not remove it. Disabled by default.
+	EN	Restore the station's original metadata when an automatic sequence ends without a valid confirmed song, including no-matches, stopped retries, and recognition failures. A later successful automatic recognition publishes the overlay again. The confirmation-bypass setting does not preserve an unsuccessful overlay. Stale samples and manual recognition do not remove it. Disabled by default.
 
 PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS
 	EN	Stations excluded from automatic recognition

@@ -1,5 +1,12 @@
 # Changelog and failure history
 
+## 2026-08-10 — Always clear overlays after automatic no-match
+
+- Removed the confirmation-bypass gate from automatic overlay clearing. When
+  overlay removal is enabled, every non-stale automatic terminal outcome
+  without a valid match now restores station metadata, regardless of whether
+  **Accept the first match after two no-results** is enabled.
+
 ## 2026-08-10 — Clear stale overlays after unsuccessful detection
 
 - Classified non-stale automatic results with `ok:true, matched:false` as

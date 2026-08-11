@@ -127,8 +127,9 @@ pages without changing recognition, URL normalization, or database storage. It
 also offers default-off options to remove the automatic metadata overlay
 after a sequence ends without a valid confirmed song, including a stopped
 retry sequence or recognition failure, and to
-**Save recognition audio for debugging**. Enabling **Accept the first match
-after two no-results** suppresses this overlay clearing.
+**Save recognition audio for debugging**. **Accept the first match after two
+no-results** changes confirmation behavior only and does not suppress overlay
+clearing after an unsuccessful sequence.
 When enabled, every exact normalized WAV submitted to Shazam is retained in
 `var/dumps`, named from the returned title (or `NoResult`) and local date/time.
 These files are retained until manually deleted. The page can also select or

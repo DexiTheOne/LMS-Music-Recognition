@@ -184,7 +184,6 @@ sub _tick {
 			}
 			elsif (
 				$prefs->get('autoClearOverlayOnNoMatch')
-				&& !$prefs->get('skipConfirmationsAfterTwoNoMatches')
 				&& !$result->{stale}
 				&& !($result->{ok} && $result->{matched})
 			) {
