@@ -69,6 +69,10 @@ the full URL. If artwork composition fails, the unmodified Shazam artwork is
 used. A separate default-off option restores the station's original metadata
 when every attempt in an automatic sequence returns no match. The next
 successful automatic sequence publishes a new overlay.
+While automatic recognition is active, the Track Info row shows a concise
+terminal failure from the latest sequence, including **No Match Found** after
+all retries return no result. The message clears when the next sequence starts;
+successful sequences leave the normal **Auto Recognition is on** label.
 
 The LMS **My Apps** menu includes **Shazam History**. Each player's plugin
 settings can independently limit the view to that player, apply a

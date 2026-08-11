@@ -103,8 +103,10 @@ sub track_info_item {
 	my ($client, undef, undef, undef, $tags) = @_;
 	return unless $client;
 	if (Plugins::ShazamCapture::Auto::eligible($client)) {
+		my $status = Plugins::ShazamCapture::Auto::menu_status($client)
+			|| 'PLUGIN_SHAZAMCAPTURE_AUTO_ON';
 		return [{
-			name => $client->string('PLUGIN_SHAZAMCAPTURE_AUTO_ON'),
+			name => $client->string($status),
 			type => 'text',
 			isContextMenu => 1,
 		}];

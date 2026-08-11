@@ -1,5 +1,15 @@
 # Changelog and failure history
 
+## 2026-08-10 — Automatic recognition menu status
+
+- Changed the non-actionable Track Info row to show **No Match Found** after
+  an automatic sequence exhausts all attempts without a result.
+- Added a concise **Auto Recognition Failed** state for other terminal
+  automatic-recognition failures while retaining detailed diagnostics in the
+  server log.
+- Cleared the prior result when the next automatic sequence starts and after a
+  successful sequence, restoring **Auto Recognition is on**.
+
 ## 2026-07-29 — Station label on automatic artwork
 
 - Treated the helper's atomic output replacement as the authoritative

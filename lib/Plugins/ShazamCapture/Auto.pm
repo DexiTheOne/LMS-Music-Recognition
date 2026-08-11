@@ -14,7 +14,7 @@ use Plugins::ShazamCapture::Artwork;
 my $log = logger('plugin.shazamcapture');
 my $prefs = preferences('plugin.shazamcapture');
 my $cache = Slim::Utils::Cache->new();
-my (%timers, %overlay, %publishing, %publishing_until);
+my (%timers, %overlay, %publishing, %publishing_until, %menu_status);
 
 sub init {
 	settings_changed();
@@ -81,6 +81,12 @@ sub status {
 	};
 }
 
+sub menu_status {
+	my ($client) = @_;
+	return unless $client;
+	return $menu_status{lc $client->id};
+}
+
 sub playback_changed {
 	my ($client, $reason) = @_;
 	return unless $client;
@@ -108,6 +114,7 @@ sub cancel {
 	my ($client, $reason, $clear) = @_;
 	return unless $client;
 	my $id = lc $client->id;
+	delete $menu_status{$id};
 	if (my $timer = delete $timers{$id}) {
 		Slim::Utils::Timers::killTimers($timer, \&_tick);
 	}
@@ -142,12 +149,22 @@ sub _tick {
 		unless $state && !$state->{awaiting_stream};
 
 	# Every automatic cycle starts with audio collected after the trigger.
+	delete $menu_status{$id};
 	Plugins::ShazamCapture::Capture::clear_pcm($id, 'automatic recognition cycle started');
 	my $generation = $state->{generation};
 	my $started = Plugins::ShazamCapture::Plugin::start_recognition(
 		$client,
 		sub {
 			my ($result, $completed_generation) = @_;
+			if ($result->{ok} && $result->{matched} && !$result->{stale}) {
+				delete $menu_status{$id};
+			}
+			elsif ($result->{exhausted_without_valid_match}) {
+				$menu_status{$id} = 'PLUGIN_SHAZAMCAPTURE_AUTO_NO_MATCH';
+			}
+			elsif (!$result->{stale}) {
+				$menu_status{$id} = 'PLUGIN_SHAZAMCAPTURE_AUTO_FAILED';
+			}
 			my $current = Plugins::ShazamCapture::Capture::state($id);
 			if (
 				$result->{ok} && $result->{matched} && !$result->{stale}
@@ -173,6 +190,7 @@ sub _tick {
 		'auto'
 	);
 	if (!$started->{ok}) {
+		$menu_status{$id} = 'PLUGIN_SHAZAMCAPTURE_AUTO_FAILED';
 		$log->info("automatic recognition could not start for $id: "
 			. ($started->{error} || 'unknown error'));
 		_schedule($client, 1) if eligible($client);
