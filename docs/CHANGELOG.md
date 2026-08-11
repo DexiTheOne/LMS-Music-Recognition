@@ -1,5 +1,14 @@
 # Changelog and failure history
 
+## 2026-08-10 — Clear stale overlays after unsuccessful detection
+
+- Classified non-stale automatic results with `ok:true, matched:false` as
+  no-matches even when retries stop early because no new PCM arrives.
+- Expanded the default-off overlay-clear option to restore station metadata
+  after any non-stale automatic terminal outcome without a valid match,
+  including recognition failures. The two-no-result confirmation bypass still
+  preserves the existing overlay when enabled.
+
 ## 2026-08-10 — Automatic recognition menu status
 
 - Changed the non-actionable Track Info row to show **No Match Found** after

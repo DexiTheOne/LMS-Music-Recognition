@@ -128,10 +128,10 @@ PLUGIN_SHAZAMCAPTURE_AUTO_METADATA_OVERLAY_DESC
 	EN	Publish title, artist, album, and artwork from successful automatic samples. Manual samples never change now-playing metadata. This setting is used only when automatic recognition is enabled.
 
 PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH
-	EN	Remove recognition overlay after an automatic no-match sequence
+	EN	Remove recognition overlay after unsuccessful automatic recognition
 
 PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH_DESC
-	EN	Restore the station's original metadata when an automatic sequence exhausts all retries without a valid confirmed song. A later successful automatic recognition publishes the overlay again. The overlay remains when Accept the first match after two no-results is enabled. Errors, stale samples, and manual recognition do not remove it. Disabled by default.
+	EN	Restore the station's original metadata when an automatic sequence ends without a valid confirmed song, including no-matches, stopped retries, and recognition failures. A later successful automatic recognition publishes the overlay again. The overlay remains when Accept the first match after two no-results is enabled. Stale samples and manual recognition do not remove it. Disabled by default.
 
 PLUGIN_SHAZAMCAPTURE_AUTO_IGNORED_STATIONS
 	EN	Stations excluded from automatic recognition

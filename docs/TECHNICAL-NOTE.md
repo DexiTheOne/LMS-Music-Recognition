@@ -89,9 +89,10 @@ generation changes, or PCM epoch changes.
 An automatic result is marked as exhausted without a valid match when the
 configured retry budget completes without an accepted, confirmed song. The
 optional default-off overlay-clear preference restores native station metadata
-for that terminal state only when the two-no-result confirmation bypass is
-disabled. Enabling that bypass preserves the prior overlay. Errors, stale
-results, early retry termination, and manual requests also leave it intact.
+for any non-stale automatic terminal result without a valid match, including
+no-matches, early retry termination, and recognition failures, when the
+two-no-result confirmation bypass is disabled. Enabling that bypass preserves
+the prior overlay. Stale results and manual requests also leave it intact.
 
 Automatic overlay artwork is composed by a separate external artwork worker,
 never on the LMS event loop. It downloads the already-selected Shazam cover,

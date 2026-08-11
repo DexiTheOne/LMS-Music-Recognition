@@ -3,6 +3,7 @@ package Plugins::ShazamCapture::API;
 use strict;
 
 use Plugins::ShazamCapture::Plugin;
+use Plugins::ShazamCapture::Auto;
 use Slim::Player::Client;
 
 our $VERSION = 1;
@@ -24,6 +25,24 @@ sub recognize {
 sub recognize_fresh {
 	my ($class, %args) = @_;
 	return $class->_recognize('fresh', %args);
+}
+
+sub overlay {
+	my ($class, %args) = @_;
+	my $player_id = _text($args{player_id}, 64);
+	return _rejected('player_id is required') unless length $player_id;
+	return _rejected('Shazam Capture is not initialized') unless available();
+
+	my $client = Slim::Player::Client::getClient($player_id);
+	return _rejected('The selected player is not connected') unless $client;
+	my $overlay = Plugins::ShazamCapture::Auto::overlay($client);
+	return _rejected('No automatic recognition overlay is present')
+		unless $overlay;
+	return {
+		ok        => 1,
+		player_id => lc $client->id,
+		overlay   => $overlay,
+	};
 }
 
 sub _recognize {

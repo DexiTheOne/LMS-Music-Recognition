@@ -152,6 +152,16 @@ sub command {
 			history=>Plugins::ShazamCapture::History::recent($limit, $offset),
 		});
 	}
+	if ($cmd eq 'overlay') {
+		my $overlay = Plugins::ShazamCapture::Auto::overlay($client);
+		return _reply($request, {
+			ok=>0, stage=>'overlay',
+			error=>'No automatic recognition overlay is present',
+		}) unless $overlay;
+		return _reply($request, {
+			ok=>1, player_id=>$id, overlay=>$overlay,
+		});
+	}
 	if ($cmd eq 'reset') {
 		Plugins::ShazamCapture::Capture::reset($id);
 		return _reply($request, {ok=>1});

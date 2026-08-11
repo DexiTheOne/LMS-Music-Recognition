@@ -11,6 +11,7 @@ CLI:
     <playerid> shazamcapture dump
     <playerid> shazamcapture recognize
     <playerid> shazamcapture recognizefresh
+    <playerid> shazamcapture overlay
     <playerid> shazamcapture history
 
 `recognize` returns immediately with `started: 1`; poll `status` for
@@ -54,6 +55,12 @@ store the caller and reason in history. Call `recognize_fresh` instead of
 `recognize` to force collection of a fresh initial sample without changing the
 global setting. See [`docs/API.md`](docs/API.md) for the complete contract and
 example.
+
+The synchronous `Plugins::ShazamCapture::API->overlay(player_id => $id)` call
+and `<playerid> shazamcapture overlay` CLI command return the metadata currently
+published by automatic recognition. Both return an explicit error when that
+player has no active automatic overlay. They only inspect plugin state and do
+not republish metadata or affect playback.
 
 Optional automatic recognition is limited to LMS Radio and `hlspl` sources.
 Each physical player has an independent recognition cycle and cooldown. Plugin
@@ -118,7 +125,8 @@ LMS exposes a global **Shazam Capture** page under plugin settings and a
 it hides both Spotify links and the missing-link message from history detail
 pages without changing recognition, URL normalization, or database storage. It
 also offers default-off options to remove the automatic metadata overlay
-after a sequence exhausts its retries without a valid confirmed song and to
+after a sequence ends without a valid confirmed song, including a stopped
+retry sequence or recognition failure, and to
 **Save recognition audio for debugging**. Enabling **Accept the first match
 after two no-results** suppresses this overlay clearing.
 When enabled, every exact normalized WAV submitted to Shazam is retained in

@@ -81,6 +81,14 @@ sub status {
 	};
 }
 
+sub overlay {
+	my ($client) = @_;
+	return unless $client;
+	my $current = $overlay{lc $client->id} or return;
+	return unless ref $current->{track} eq 'HASH';
+	return { %{$current->{track}} };
+}
+
 sub menu_status {
 	my ($client) = @_;
 	return unless $client;
@@ -159,7 +167,7 @@ sub _tick {
 			if ($result->{ok} && $result->{matched} && !$result->{stale}) {
 				delete $menu_status{$id};
 			}
-			elsif ($result->{exhausted_without_valid_match}) {
+			elsif ($result->{ok} && !$result->{matched} && !$result->{stale}) {
 				$menu_status{$id} = 'PLUGIN_SHAZAMCAPTURE_AUTO_NO_MATCH';
 			}
 			elsif (!$result->{stale}) {
@@ -175,13 +183,14 @@ sub _tick {
 				_prepare_overlay($client, $current, $result->{track});
 			}
 			elsif (
-				$result->{exhausted_without_valid_match}
-				&& $prefs->get('autoClearOverlayOnNoMatch')
+				$prefs->get('autoClearOverlayOnNoMatch')
 				&& !$prefs->get('skipConfirmationsAfterTwoNoMatches')
+				&& !$result->{stale}
+				&& !($result->{ok} && $result->{matched})
 			) {
 				clear_overlay(
 					$client,
-					'automatic recognition retries exhausted without a valid match'
+					'automatic recognition completed without a valid match'
 				);
 			}
 			return unless eligible($client);

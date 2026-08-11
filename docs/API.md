@@ -29,6 +29,37 @@ my $version = Plugins::ShazamCapture::API->api_version(); # 1
 
 Callers should test the major integer version before relying on newer fields.
 
+## Reading the automatic overlay
+
+The current automatic-recognition overlay is available synchronously:
+
+```perl
+my $result = Plugins::ShazamCapture::API->overlay(
+	player_id => $player_id,
+);
+```
+
+A successful response contains the exact metadata currently published for the
+selected player:
+
+```perl
+{
+	ok        => 1,
+	player_id => '00:04:20:1f:78:65',
+	overlay   => {
+		title       => 'Example Song',
+		artist      => 'Example Artist',
+		album       => 'Example Album',
+		artwork_url => 'http://localhost:9000/...',
+	},
+}
+```
+
+When no overlay is active, the response has `ok => 0` and the error
+`No automatic recognition overlay is present`. A missing or disconnected
+player and an uninitialized plugin are also rejected. This call does not start
+recognition, publish metadata, invoke a callback, or affect playback.
+
 ## Starting recognition
 
 ```perl

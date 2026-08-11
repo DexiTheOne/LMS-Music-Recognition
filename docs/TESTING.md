@@ -39,10 +39,10 @@ web UI:
    original station metadata returns. Confirm the next successful automatic
    sequence publishes its recognized metadata again.
 5. With **Accept the first match after two no-results** disabled, confirm an
-   exhausted sequence with no valid confirmed song clears the overlay. Enable
-   the confirmation bypass and confirm the same unsuccessful sequence preserves
-   the overlay. Worker errors, stale results, and stopped retry sequences must
-   also preserve it.
+   exhausted no-match, a stopped retry sequence, and a worker or recognition
+   failure each clear the overlay. Confirm a stale result does not clear it.
+   Enable the confirmation bypass and confirm each unsuccessful automatic
+   outcome preserves the overlay.
 6. Confirm all five numeric controls render as LMS/MUI-style sliders rather
    than browser-native number boxes.
 7. Save boundary values and confirm they persist: sample lengths 5–30 seconds,
@@ -358,6 +358,7 @@ Use the current test player:
 00:04:20:1f:78:65 shazamcapture reset
 00:04:20:1f:78:65 shazamcapture recognize
 00:04:20:1f:78:65 shazamcapture recognizefresh
+00:04:20:1f:78:65 shazamcapture overlay
 00:04:20:1f:78:65 shazamcapture history limit:25 offset:0
 00:04:20:1f:78:65 shazamcapture dump
 ```

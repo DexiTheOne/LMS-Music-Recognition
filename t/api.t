@@ -21,6 +21,16 @@ BEGIN {
 
 	$INC{'Plugins/ShazamCapture/Plugin.pm'} = __FILE__;
 
+	package Plugins::ShazamCapture::Auto;
+
+	our $overlay;
+
+	sub overlay {
+		return $overlay && { %$overlay };
+	}
+
+	$INC{'Plugins/ShazamCapture/Auto.pm'} = __FILE__;
+
 	package Slim::Player::Client;
 
 	our %clients;
@@ -129,6 +139,29 @@ is_deeply(
 	$Plugins::ShazamCapture::Plugin::start_args[4],
 	{ sample_mode => 'fresh' },
 	'fresh API forces fresh sampling',
+);
+
+is(
+	Plugins::ShazamCapture::API->overlay(player_id => $id)->{error},
+	'No automatic recognition overlay is present',
+	'rejects an overlay lookup when no automatic overlay is present',
+);
+$Plugins::ShazamCapture::Auto::overlay = {
+	title => 'Example', artist => 'Artist', album => 'Album',
+	artwork_url => 'http://localhost/cover.jpg',
+};
+my $overlay = Plugins::ShazamCapture::API->overlay(player_id => uc($id));
+ok($overlay->{ok}, 'returns the current automatic overlay');
+is($overlay->{player_id}, $id, 'normalizes overlay player ID');
+is_deeply(
+	$overlay->{overlay},
+	$Plugins::ShazamCapture::Auto::overlay,
+	'returns all published overlay fields',
+);
+$overlay->{overlay}->{title} = 'Changed';
+is(
+	$Plugins::ShazamCapture::Auto::overlay->{title}, 'Example',
+	'does not expose mutable automatic overlay state',
 );
 
 $Plugins::ShazamCapture::Plugin::start_result = {
