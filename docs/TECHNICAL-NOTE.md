@@ -94,6 +94,11 @@ no-matches, early retry termination, and recognition failures. The
 two-no-result confirmation bypass affects only whether a later match needs
 confirmation; it never preserves an overlay after an unsuccessful terminal
 result. Stale results and manual requests leave it intact.
+Overlay publication snapshots the native `wmaMeta` and remote-image cache
+entries before replacing them. Plugin-generated artwork identifies residual
+overlay metadata left in a live LMS song across a server restart; such residue
+is never accepted as native restoration state. Clearing restores the saved
+native values or removes plugin-owned cache entries before notifying clients.
 
 Automatic overlay artwork is composed by a separate external artwork worker,
 never on the LMS event loop. It downloads the already-selected Shazam cover,

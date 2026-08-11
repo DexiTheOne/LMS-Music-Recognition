@@ -234,7 +234,19 @@ sub _publish_overlay {
 	my $song = eval { $client->playingSong } || eval { $client->streamingSong };
 	return unless $song;
 	my $old = eval { $song->pluginData('wmaMeta') };
-	$overlay{$id} ||= { song => $song, old => $old };
+	$old = undef if _plugin_owned_meta($old);
+	my @urls = grep { defined $_ && length $_ } (
+		$state->{url}, eval { $song->track->url }, eval { $song->currentTrack->url }
+	);
+	if (!$overlay{$id}) {
+		my %old_images = map {
+			my $key = "remote_image_$_";
+			$key => $cache->get($key)
+		} @urls;
+		$overlay{$id} = {
+			song => $song, old => $old, old_images => \%old_images,
+		};
+	}
 	my $artwork_url = $track->{station_artwork_ready}
 		? Plugins::ShazamCapture::Artwork::url($id)
 		: undef;
@@ -250,9 +262,7 @@ sub _publish_overlay {
 		album => $track->{album}, cover => $artwork_url,
 	};
 	eval { $song->pluginData(wmaMeta => $meta) };
-	for my $url (grep { defined $_ && length $_ } (
-		$state->{url}, eval { $song->track->url }, eval { $song->currentTrack->url }
-	)) {
+	for my $url (@urls) {
 		$cache->set("remote_image_$url", $artwork_url, 86400)
 			if $artwork_url;
 	}
@@ -278,6 +288,12 @@ sub clear_overlay {
 	my $saved = delete $overlay{$id} or return;
 	my $song = $saved->{song};
 	eval { $song->pluginData(wmaMeta => $saved->{old}) } if $song;
+	for my $key (keys %{$saved->{old_images} || {}}) {
+		my $old = $saved->{old_images}->{$key};
+		defined $old
+			? $cache->set($key, $old, 86400)
+			: $cache->remove($key);
+	}
 	$client->metaTitle('');
 	$publishing_until{$id} = time() + 2;
 	local $publishing{$id} = 1;
@@ -288,6 +304,13 @@ sub clear_overlay {
 	$client->update();
 	$log->info("automatic metadata overlay cleared for $id: "
 		. ($reason || 'overlay cleared'));
+}
+
+sub _plugin_owned_meta {
+	my ($meta) = @_;
+	return 0 unless ref $meta eq 'HASH';
+	my $cover = $meta->{cover} || '';
+	return $cover =~ m{/plugins/ShazamCapture/artwork/}i ? 1 : 0;
 }
 
 sub _source {

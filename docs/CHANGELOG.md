@@ -1,5 +1,13 @@
 # Changelog and failure history
 
+## 2026-08-10 — Restore station metadata after clearing a residual overlay
+
+- Fixed automatic clearing restoring a recognized song when LMS retained the
+  prior plugin `wmaMeta` across a server restart. Plugin-generated artwork now
+  marks that metadata as residual overlay state rather than native metadata.
+- Snapshot and restore the affected remote-image cache entries with each
+  overlay, removing plugin-owned cached artwork when no native value existed.
+
 ## 2026-08-10 — Always clear overlays after automatic no-match
 
 - Removed the confirmation-bypass gate from automatic overlay clearing. When

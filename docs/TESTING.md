@@ -42,11 +42,15 @@ web UI:
    recognition failure each clear the overlay. Enable **Accept the first match
    after two no-results** and repeat an unsuccessful sequence; confirm it still
    clears the overlay. Confirm a stale result does not clear it.
-6. Confirm all five numeric controls render as LMS/MUI-style sliders rather
+6. Restart LMS while a generated automatic overlay is visible. After the first
+   post-restart match and subsequent no-match, confirm the plugin restores the
+   station title rather than the recognized metadata that survived the restart,
+   and confirm the generated artwork is no longer returned by player status.
+7. Confirm all five numeric controls render as LMS/MUI-style sliders rather
    than browser-native number boxes.
-7. Save boundary values and confirm they persist: sample lengths 5–30 seconds,
+8. Save boundary values and confirm they persist: sample lengths 5–30 seconds,
    retries 0–10, consecutive confirmations 1–11, and delay 1–30 seconds.
-8. Confirm **Accept the first match after two no-results** is available and
+9. Confirm **Accept the first match after two no-results** is available and
    defaults to off. Enable it with at least two retries and a confirmation
    value above 1; after two initial no-matches, confirm the next match succeeds
    without another confirmation attempt.
