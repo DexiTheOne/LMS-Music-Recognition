@@ -1,5 +1,12 @@
 # Changelog and failure history
 
+## 2026-08-11 — Clear overlays from the current long-stream song object
+
+- Fixed automatic overlay removal on long-running streams where LMS replaced
+  the live song object after the overlay was first published. Removal now
+  restores the current playback objects too, and can scrub a plugin-owned
+  overlay even when the in-memory overlay record has already been cleared.
+
 ## 2026-08-10 — Restore station metadata after clearing a residual overlay
 
 - Fixed automatic clearing restoring a recognized song when LMS retained the

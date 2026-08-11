@@ -285,14 +285,35 @@ sub clear_overlay {
 	return unless $client;
 	my $id = lc $client->id;
 	Plugins::ShazamCapture::Artwork::clear($id);
-	my $saved = delete $overlay{$id} or return;
-	my $song = $saved->{song};
-	eval { $song->pluginData(wmaMeta => $saved->{old}) } if $song;
-	for my $key (keys %{$saved->{old_images} || {}}) {
+	my $saved = delete $overlay{$id};
+	my @songs = grep { $_ } (
+		$saved && $saved->{song},
+		eval { $client->playingSong },
+		eval { $client->streamingSong },
+		eval { $client->controller->songStreamController->song },
+	);
+	my (%seen, %live_urls);
+	my $cleared;
+	for my $song (@songs) {
+		my $key = "$song";
+		next if $seen{$key}++;
+		for my $url (eval { $song->track->url }, eval { $song->currentTrack->url }) {
+			$live_urls{$url} = 1 if defined $url && length $url;
+		}
+		my $current = eval { $song->pluginData('wmaMeta') };
+		next unless $saved || _plugin_owned_meta($current);
+		eval { $song->pluginData(wmaMeta => ($saved ? $saved->{old} : undef)) };
+		$cleared = 1;
+	}
+	return unless $saved || $cleared;
+	for my $key (keys %{$saved && $saved->{old_images} || {}}) {
 		my $old = $saved->{old_images}->{$key};
 		defined $old
 			? $cache->set($key, $old, 86400)
 			: $cache->remove($key);
+	}
+	if (!$saved) {
+		$cache->remove("remote_image_$_") for keys %live_urls;
 	}
 	$client->metaTitle('');
 	$publishing_until{$id} = time() + 2;

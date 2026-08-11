@@ -1,5 +1,14 @@
 # Terminal test procedures
 
+## Long-stream automatic overlay removal
+
+With automatic recognition and **Remove overlay after no match** enabled, let a
+recognized song transition into talk or other content that returns no match.
+After the final automatic no-match, verify the recognized title and plugin
+artwork disappear and the station's native title/artwork can show again. This
+must also work after LMS has refreshed its internal song object during the same
+continuous stream.
+
 ## Plugin API contract
 
 Run the isolated API contract test without playback or network access:
