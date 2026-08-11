@@ -7,7 +7,8 @@ recognized song transition into talk or other content that returns no match.
 After the final automatic no-match, verify the recognized title and plugin
 artwork disappear and the station's native title/artwork can show again. This
 must also work after LMS has refreshed its internal song object during the same
-continuous stream.
+continuous stream and when LMS reports the plugin artwork through an
+`/imageproxy/...%2Fplugins%2FShazamCapture%2Fartwork...` URL.
 
 ## Plugin API contract
 

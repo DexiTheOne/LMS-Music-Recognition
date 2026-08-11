@@ -241,7 +241,8 @@ sub _publish_overlay {
 	if (!$overlay{$id}) {
 		my %old_images = map {
 			my $key = "remote_image_$_";
-			$key => $cache->get($key)
+			my $old_image = $cache->get($key);
+			$key => (_plugin_owned_artwork($old_image) ? undef : $old_image)
 		} @urls;
 		$overlay{$id} = {
 			song => $song, old => $old, old_images => \%old_images,
@@ -331,7 +332,15 @@ sub _plugin_owned_meta {
 	my ($meta) = @_;
 	return 0 unless ref $meta eq 'HASH';
 	my $cover = $meta->{cover} || '';
-	return $cover =~ m{/plugins/ShazamCapture/artwork/}i ? 1 : 0;
+	return _plugin_owned_artwork($cover);
+}
+
+sub _plugin_owned_artwork {
+	my ($url) = @_;
+	return 0 unless defined $url && length $url;
+	return 1 if $url =~ m{/plugins/ShazamCapture/artwork/}i;
+	return 1 if $url =~ m{%2fplugins%2fShazamCapture%2fartwork%2f}i;
+	return 0;
 }
 
 sub _source {

@@ -6,6 +6,9 @@
   the live song object after the overlay was first published. Removal now
   restores the current playback objects too, and can scrub a plugin-owned
   overlay even when the in-memory overlay record has already been cleared.
+- Recognize LMS image-proxy encoded plugin artwork as overlay-owned metadata.
+  Encoded plugin artwork and cache entries are no longer saved as native
+  station state and restored after a no-match.
 
 ## 2026-08-10 — Restore station metadata after clearing a residual overlay
 
