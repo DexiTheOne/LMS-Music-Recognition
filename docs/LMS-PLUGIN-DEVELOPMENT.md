@@ -101,6 +101,33 @@ menus, and settings templates. Treat token names as stable API. Include an
 English value and do not hard-code user-visible prose where LMS expects a
 string token.
 
+### Repository packaging and distribution
+
+LMS custom repositories use an XML index with a `<plugins>` collection. The
+repository plugin `name` must match the package directory (for example,
+`ShazamCapture` for `Plugins::ShazamCapture::Plugin`), and its `version` must
+match the value in `install.xml`. The entry points to a ZIP URL and carries the
+archive's SHA-1 so LMS can reject a corrupt or substituted download.
+
+The ZIP must place `install.xml` at its root; do not wrap the contents in a
+project directory. Give every release a new versioned filename because LMS or
+an intervening HTTP cache can otherwise reuse stale bytes. Repository entries
+can also declare `target`, `minTarget`, and `maxTarget`; these should describe
+the actual tested operating system and LMS compatibility rather than an
+aspirational range.
+
+Plugin authors can host their repository XML and versioned archives
+independently. Users add the raw XML URL in the LMS Plugins settings page. The
+LMS-Community default repository is an aggregator: inclusion is requested by
+adding the author's repository XML URL to the community
+`lms-plugin-repository` `include.json`; it is not required for custom-repository
+installation.
+
+Never ship a development virtual environment in a portable source ZIP. Native
+Python extensions and helper binaries are tied to an operating system, CPU,
+and often a Python ABI. Supply a documented host/container bootstrap, or build
+and select platform-specific runtime assets explicitly.
+
 The main module usually inherits from `Slim::Plugin::Base` or a more specific
 base such as `Slim::Plugin::OPMLBased`. In `initPlugin`, call the superclass
 initializer where required, initialize preferences, register settings and
@@ -540,4 +567,3 @@ regression requirements, but they are not universal API guarantees. Reinspect
 the relevant LMS and skin source and repeat the client matrix when upgrading
 LMS, Material Skin, SqueezePlay/Jive, or deploying to materially different
 hardware.
-

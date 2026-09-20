@@ -1,5 +1,15 @@
 # Changelog and failure history
 
+## 2026-09-20 — Installable custom-repository package (0.3.0)
+
+- Added a versioned, flat LMS plugin release archive builder and checksum
+  verifier.
+- Added the public custom-repository definition used by LMS Plugin Manager.
+- Added an idempotent initialization script and installation guide for the
+  official Linux Docker image's persistent `/config` volume.
+- Documented the official LMS repository XML, archive layout, version matching,
+  SHA-1, cache-busting, and upstream aggregation conventions.
+
 ## 2026-08-11 — Clear overlays from the current long-stream song object
 
 - Fixed automatic overlay removal on long-running streams where LMS replaced

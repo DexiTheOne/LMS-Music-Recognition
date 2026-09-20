@@ -4,6 +4,27 @@ Diagnostic LMS 9.1.0 plugin which copies bytes already being proxied to the
 original physical player. It never opens the source URL, changes player
 preferences, joins sync groups, or controls playback.
 
+## Install from the LMS Plugins page
+
+Add this custom repository URL under **Settings → Plugins → Additional
+Repositories**:
+
+    https://raw.githubusercontent.com/DexiTheOne/LMS-Music-Recognition/main/repo.xml
+
+After LMS refreshes the repository list, select **Shazam Capture**, apply the
+change, and allow LMS to restart. The repository release is a versioned ZIP
+whose `install.xml` is at the archive root and whose SHA-1 is verified by LMS.
+
+Recognition also needs Python and FFmpeg. For the official LMS Docker image,
+install the operating-system prerequisites and build the plugin-local virtual
+environment with the supplied [`docker/custom-init.sh`](docker/custom-init.sh).
+Copy it to `/config/custom-init.sh` on the Docker host and make it executable.
+The script is safe to run on every container start and completes the Python
+environment after the plugin has been installed. On the first installation,
+restart the container once after LMS installs the plugin so the script can see
+the new plugin directory. See [`docs/INSTALL.md`](docs/INSTALL.md) for the
+complete procedure and architecture-independent alternatives.
+
 CLI:
 
     <playerid> shazamcapture status
