@@ -1,5 +1,13 @@
 # Changelog and failure history
 
+## 2026-09-20 — Suppress unchanged automatic overlays
+
+- Reused the active automatic overlay when a successive successful capture
+  identifies the same track, avoiding repeated artwork writes and now-playing
+  refresh notifications that could make album art flash.
+- Still republish when the station artwork-label context changes so settings
+  and station identity changes take effect on the next successful sample.
+
 ## 2026-09-20 — Portable station artwork renderer (0.3.2)
 
 - Replaced FFmpeg `drawtext` station-label rendering with Pillow so Linux

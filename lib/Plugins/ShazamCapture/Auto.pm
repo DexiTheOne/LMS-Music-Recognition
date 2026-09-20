@@ -210,8 +210,10 @@ sub _prepare_overlay {
 	my $id = lc $client->id;
 	my (undef, $station) = _source($client);
 	$station = _station_label($station);
+	my $label_artwork = $prefs->get('autoStationArtworkLabel') ? 1 : 0;
+	return if _overlay_unchanged($overlay{$id}, $track, $station, $label_artwork);
 	return _publish_overlay($client, $state, $track)
-		unless $prefs->get('autoStationArtworkLabel')
+		unless $label_artwork
 			&& $track->{artwork_url} && $station;
 	Plugins::ShazamCapture::Artwork->compose(
 		$id, $state->{generation}, $track->{artwork_url}, $station,
@@ -268,6 +270,9 @@ sub _publish_overlay {
 		album => $track->{album} || '',
 		artwork_url => $artwork_url,
 	};
+	$overlay{$id}->{identity} = _overlay_identity($track);
+	$overlay{$id}->{render_station} = $station || '';
+	$overlay{$id}->{label_artwork} = $prefs->get('autoStationArtworkLabel') ? 1 : 0;
 	my $meta = {
 		title => $track->{title}, artist => $track->{artist},
 		album => $track->{album}, cover => $artwork_url,
@@ -289,6 +294,32 @@ sub _publish_overlay {
 	$log->info("automatic metadata overlay published for $id: "
 		. join(' — ', grep { defined $_ && length $_ }
 			($track->{title}, $track->{artist}, $track->{album})));
+}
+
+sub _overlay_unchanged {
+	my ($current, $track, $station, $label_artwork) = @_;
+	return 0 unless ref $current eq 'HASH' && ref $current->{track} eq 'HASH';
+	my $identity = _overlay_identity($track);
+	return 0 unless defined $identity && defined $current->{identity};
+	return 0 unless $identity eq $current->{identity};
+	return 0 unless ($station || '') eq ($current->{render_station} || '');
+	return 0 unless ($label_artwork ? 1 : 0) == ($current->{label_artwork} ? 1 : 0);
+	return 1;
+}
+
+sub _overlay_identity {
+	my ($track) = @_;
+	return unless ref $track eq 'HASH';
+	my @parts = map {
+		my $value = defined $_ ? lc "$_" : '';
+		$value =~ s/^\s+|\s+$//g;
+		$value =~ s/\s+/ /g;
+		$value;
+	} @{$track}{qw(title artist album)};
+	return unless length join('', @parts);
+	my $artwork = lc($track->{artwork_url} || '');
+	$artwork =~ s/[?#].*\z//;
+	return join("\x1f", @parts, $artwork);
 }
 
 sub clear_overlay {

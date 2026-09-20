@@ -101,6 +101,8 @@ per-player `var/logs/artwork_PLAYER_ID.log` diagnostic file. A separate
 default-off option restores the station's original metadata
 when every attempt in an automatic sequence returns no match. The next
 successful automatic sequence publishes a new overlay.
+Successive automatic captures of the same recognized track leave the existing
+overlay in place without rewriting artwork or sending another metadata refresh.
 While automatic recognition is active, the Track Info row shows a concise
 terminal failure from the latest sequence, including **No Match Found** after
 all retries return no result. The message clears when the next sequence starts;
