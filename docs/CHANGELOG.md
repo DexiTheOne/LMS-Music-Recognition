@@ -1,5 +1,14 @@
 # Changelog and failure history
 
+## 2026-09-20 — Restore PlayHLS station artwork (0.3.4)
+
+- Read PlayHLS 2.12's preserved `hls_coverurl` song field directly before
+  publishing an overlay. Resolving artwork indirectly through `song->icon`
+  can consult the plugin-overwritten current-track cache first and miss the
+  original station image.
+- Prefer the preserved PlayHLS station image even when residual overlay
+  metadata remains after a plugin upgrade or server restart.
+
 ## 2026-09-20 — Restore protocol-handler station artwork (0.3.3)
 
 - Preserve native station artwork exposed by the live song or protocol handler

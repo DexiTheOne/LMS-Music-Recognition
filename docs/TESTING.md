@@ -12,6 +12,9 @@ continuous stream and when LMS reports the plugin artwork through an
 Repeat with an HLS protocol handler that exposes its station picture through
 the live song metadata but has no matching `remote_image_*` cache entry; the
 original station picture must return instead of LMS's generic radio cover.
+For PlayHLS 2.12, confirm restoration uses its preserved `hls_coverurl` even
+when `wmaMeta`, `song->icon`, and the current stream cache still resolve to a
+plugin-owned overlay from before a server restart or plugin update.
 Confirm the status response contains the station title after removal rather
 than falling back to the last recognized song title.
 

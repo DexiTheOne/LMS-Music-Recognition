@@ -126,6 +126,18 @@ is(
 );
 is(
 	Plugins::ShazamCapture::Auto::_native_artwork(
+		TestSong->new(
+			hls_coverurl => 'https://station.test/original-logo.png',
+			icon => '/imageproxy/http%3A%2F%2Fserver%2Fplugins%2FShazamCapture%2Fartwork%2Fplayer.jpg/image.jpg',
+		),
+		{ cover => '/imageproxy/http%3A%2F%2Fserver%2Fplugins%2FShazamCapture%2Fartwork%2Fplayer.jpg/image.jpg' },
+		'hlsplay://station.test/live'
+	),
+	'https://station.test/original-logo.png',
+	'PlayHLS station artwork takes precedence over contaminated overlay metadata',
+);
+is(
+	Plugins::ShazamCapture::Auto::_native_artwork(
 		TestSong->new(icon => 'html/images/radio.png'),
 		{ cover => '/imageproxy/http%3A%2F%2Fserver%2Fplugins%2FShazamCapture%2Fartwork%2Fplayer.jpg/image.jpg' },
 		'hlsplay://station.test/live'

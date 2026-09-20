@@ -397,6 +397,9 @@ sub _native_artwork {
 	my ($song, $meta, @urls) = @_;
 	my @candidates = (
 		ref $meta eq 'HASH' ? $meta->{cover} : undef,
+		# PlayHLS preserves the station/favorite image here before its
+		# hlsplay:// metadata handler begins serving dynamic track metadata.
+		eval { $song->pluginData('hls_coverurl') },
 		eval { $song->pluginData('httpCover') },
 		(map { $cache->get("remote_image_$_") } @urls),
 		eval { $song->icon },
