@@ -116,6 +116,14 @@ def compose_station_artwork(source, station, output, ffmpeg, timeout):
             capture_output=True, timeout=min(timeout, 8), check=False
         )
         if proc.returncode or not os.path.getsize(staged):
+            detail = proc.stderr.decode("utf-8", "replace").strip()
+            if detail:
+                print(f"FFmpeg station artwork error: {detail[-2000:]}", file=sys.stderr)
+            else:
+                print(
+                    f"FFmpeg station artwork failed with exit code {proc.returncode}",
+                    file=sys.stderr,
+                )
             return False
         os.replace(staged, output)
         return True

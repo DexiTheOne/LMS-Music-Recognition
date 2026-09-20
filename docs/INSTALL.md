@@ -37,14 +37,16 @@ The official `lmscommunity/lyrionmusicserver` image supports a persistent
    both `python_ready` and `ffmpeg_ready` are `1`.
 
 The virtual environment lives below `/config/cache`, so it persists with the
-normal LMS configuration volume. The script checks dependencies on later
-starts, which also repairs the environment after an LMS plugin upgrade replaces
-the installed directory.
+normal LMS configuration volume. The script also installs Fontconfig and a
+DejaVu font for FFmpeg's station-name artwork label. It checks dependencies on
+later starts, which also repairs the environment after an LMS plugin upgrade
+replaces the installed directory.
 
 If the container does not run as root during `custom-init.sh`, bake `python3`,
-`python3-venv`, and CA certificates into a derived image instead. Then create
-the virtual environment from `python/requirements.txt` in the installed plugin
-directory. Do not copy the macOS development environment to Linux.
+`python3-venv`, CA certificates, Fontconfig, and at least one usable font into a
+derived image instead. Then create the virtual environment from
+`python/requirements.txt` in the installed plugin directory. Do not copy the
+macOS development environment to Linux.
 
 ## Release procedure
 

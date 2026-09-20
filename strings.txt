@@ -127,6 +127,12 @@ PLUGIN_SHAZAMCAPTURE_AUTO_METADATA_OVERLAY
 PLUGIN_SHAZAMCAPTURE_AUTO_METADATA_OVERLAY_DESC
 	EN	Publish title, artist, album, and artwork from successful automatic samples. Manual samples never change now-playing metadata. This setting is used only when automatic recognition is enabled.
 
+PLUGIN_SHAZAMCAPTURE_AUTO_STATION_ARTWORK_LABEL
+	EN	Show the radio station name on recognized artwork
+
+PLUGIN_SHAZAMCAPTURE_AUTO_STATION_ARTWORK_LABEL_DESC
+	EN	Add a translucent station-name bar to artwork published by automatic recognition. If rendering is disabled or fails, the original recognized cover is used. Changes apply to the next successful automatic match. Enabled by default.
+
 PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH
 	EN	Remove recognition overlay after unsuccessful automatic recognition
 

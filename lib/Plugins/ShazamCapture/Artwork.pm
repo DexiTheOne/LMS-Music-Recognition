@@ -9,8 +9,10 @@ use Plugins::ShazamCapture::Runtime;
 use Slim::Web::HTTP;
 use Slim::Web::Pages;
 use Slim::Utils::Network;
+use Slim::Utils::Log;
 use Slim::Utils::Timers;
 
+my $log = logger('plugin.shazamcapture');
 my $root;
 my $prefix = 'plugins/ShazamCapture/artwork/';
 my %jobs;
@@ -74,6 +76,9 @@ sub compose {
 	return $done->(0, $generation) unless $python;
 	my $helper = File::Spec->catfile($root, 'python', 'artwork.py');
 	my $output = path($id);
+	my $diagnostic = File::Spec->catfile(
+		$root, 'var', 'logs', 'artwork_' . _safe($id) . '.log'
+	);
 	my $previous = _identity($output);
 	my $pid = fork();
 	return $done->(0, $generation) unless defined $pid;
@@ -81,7 +86,7 @@ sub compose {
 		untie *STDOUT if tied *STDOUT;
 		untie *STDERR if tied *STDERR;
 		CORE::open(STDOUT, '>', File::Spec->devnull) or POSIX::_exit(126);
-		CORE::open(STDERR, '>', File::Spec->devnull) or POSIX::_exit(126);
+		CORE::open(STDERR, '>', $diagnostic) or POSIX::_exit(126);
 		exec {$python} (
 			$python, $helper, '--url', encode_utf8($artwork_url),
 			'--station', encode_utf8($station),
@@ -115,7 +120,29 @@ sub _poll {
 	my $current = _identity($job->{output});
 	my $ok = $current && $current ne ($job->{previous} || '');
 	delete $jobs{$id};
+	if (!$ok) {
+		my $detail = _diagnostic($id);
+		$log->warn("station artwork composition failed for $id"
+			. (length($detail) ? ": $detail" : ' without diagnostic output'));
+	}
 	$job->{done}->($ok ? 1 : 0, $job->{generation});
+}
+
+sub _diagnostic {
+	my ($id) = @_;
+	my $path = File::Spec->catfile(
+		$root, 'var', 'logs', 'artwork_' . _safe($id) . '.log'
+	);
+	return '' unless -f $path;
+	open my $fh, '<', $path or return '';
+	local $/;
+	my $text = <$fh> || '';
+	close $fh;
+	$text =~ s/[\r\n]+/ /g;
+	$text =~ s/\s+/ /g;
+	$text =~ s/^\s+|\s+$//g;
+	$text = substr($text, -2000) if length($text) > 2000;
+	return $text;
 }
 
 sub _reap_cancelled {

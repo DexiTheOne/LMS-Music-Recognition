@@ -4,16 +4,16 @@
     <title lang="EN">DexiTheOne LMS Plugins</title>
   </details>
   <plugins>
-    <plugin name="ShazamCapture" version="0.3.0" target="unix" minTarget="9.1.0" maxTarget="9.1.*">
+    <plugin name="ShazamCapture" version="0.3.1" target="unix" minTarget="9.1.0" maxTarget="9.1.*">
       <title lang="EN">Shazam Capture</title>
       <desc lang="EN">Recognize music already being proxied by LMS without interrupting playback.</desc>
-      <changes lang="EN">Adds a versioned LMS repository package and documented Linux Docker installation.</changes>
+      <changes lang="EN">Adds a station-artwork label toggle and Linux-friendly artwork diagnostics.</changes>
       <creator>DexiTheOne</creator>
       <category>information</category>
       <link>https://github.com/DexiTheOne/LMS-Music-Recognition</link>
       <icon>https://raw.githubusercontent.com/DexiTheOne/LMS-Music-Recognition/main/HTML/EN/plugins/ShazamCapture/html/images/shazamcapture.png</icon>
-      <url>https://github.com/DexiTheOne/LMS-Music-Recognition/releases/download/v0.3.0/ShazamCapture-0.3.0.zip</url>
-      <sha>e71be7cdff8c15fc8c4bd4bacc9d182ec137933f</sha>
+      <url>https://github.com/DexiTheOne/LMS-Music-Recognition/releases/download/v0.3.1/ShazamCapture-0.3.1.zip</url>
+      <sha>ec597d4ef656d46a54b8fec1299129f64dab10bc</sha>
     </plugin>
   </plugins>
 </extensions>

@@ -1,5 +1,17 @@
 # Changelog and failure history
 
+## 2026-09-20 — Station artwork controls and diagnostics (0.3.1)
+
+- Added a default-on setting to show or hide the radio-station label on
+  automatically recognized cover artwork.
+- Preserved the original recognized cover as the fallback when station-label
+  rendering is disabled or fails.
+- Added actionable artwork-helper diagnostics to the LMS server log and the
+  latest bounded per-player `var/logs/artwork_PLAYER_ID.log` file, including
+  FFmpeg filter and font errors that can differ between Linux builds.
+- Added Fontconfig and DejaVu to the official Docker initialization path so
+  FFmpeg has a font available in minimal Linux containers.
+
 ## 2026-09-20 — Installable custom-repository package (0.3.0)
 
 - Added a versioned, flat LMS plugin release archive builder and checksum

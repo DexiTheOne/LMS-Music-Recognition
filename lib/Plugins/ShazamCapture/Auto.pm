@@ -211,11 +211,18 @@ sub _prepare_overlay {
 	my (undef, $station) = _source($client);
 	$station = _station_label($station);
 	return _publish_overlay($client, $state, $track)
-		unless $track->{artwork_url} && $station;
+		unless $prefs->get('autoStationArtworkLabel')
+			&& $track->{artwork_url} && $station;
 	Plugins::ShazamCapture::Artwork->compose(
 		$id, $state->{generation}, $track->{artwork_url}, $station,
 		sub {
 			my ($ready, $generation) = @_;
+			$log->info(
+				$ready
+					? "station artwork label composed for $id"
+					: "station artwork label failed for $id; using original cover (see var/logs/artwork_"
+						. _safe_id($id) . '.log)'
+			);
 			my $current = Plugins::ShazamCapture::Capture::state($id);
 			return unless $current
 				&& $current->{generation} == $generation
@@ -417,6 +424,13 @@ sub _cooldown {
 	$value = 30 if $value < 30;
 	$value = 900 if $value > 900;
 	return int($value);
+}
+
+sub _safe_id {
+	my ($id) = @_;
+	$id = lc($id || '');
+	$id =~ s/[^a-z0-9]+/_/g;
+	return $id;
 }
 
 1;

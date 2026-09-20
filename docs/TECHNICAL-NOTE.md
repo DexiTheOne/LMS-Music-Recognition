@@ -115,6 +115,11 @@ artwork. If LMS has only a raw URL rather than a friendly station title, the
 label uses `Radio - hostname` and never prints the full stream URL into the
 artwork.
 
+Station-label composition is independently controlled by the default-on
+`autoStationArtworkLabel` preference. A failed helper falls back to the remote
+cover and records the latest FFmpeg error in both the LMS log and the bounded
+per-player `var/logs/artwork_PLAYER_ID.log` file.
+
 The atomic destination replacement is also the authoritative completion
 signal. LMS can reap a short-lived artwork child before its timer observes the
 process exit status; a changed file identity is safe to accept because the

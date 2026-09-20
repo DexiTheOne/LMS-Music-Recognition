@@ -84,6 +84,15 @@
 		/>
 	[% END %]
 
+	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_STATION_ARTWORK_LABEL" desc="PLUGIN_SHAZAMCAPTURE_AUTO_STATION_ARTWORK_LABEL_DESC" %]
+		<input type="checkbox"
+			name="pref_autoStationArtworkLabel"
+			id="autoStationArtworkLabel"
+			value="1"
+			[% IF prefs.autoStationArtworkLabel %]checked="checked"[% END %]
+		/>
+	[% END %]
+
 	[% WRAPPER setting title="PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH" desc="PLUGIN_SHAZAMCAPTURE_AUTO_CLEAR_OVERLAY_NO_MATCH_DESC" %]
 		<input type="checkbox"
 			name="pref_autoClearOverlayOnNoMatch"

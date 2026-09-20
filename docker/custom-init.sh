@@ -3,7 +3,8 @@ set -eu
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install --no-install-recommends -qy python3 python3-venv ca-certificates
+apt-get install --no-install-recommends -qy \
+	python3 python3-venv ca-certificates fontconfig fonts-dejavu-core
 
 plugin_root=/config/cache/InstalledPlugins/Plugins/ShazamCapture
 requirements="$plugin_root/python/requirements.txt"

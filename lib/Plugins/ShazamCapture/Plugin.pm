@@ -71,6 +71,7 @@ sub initPlugin {
 		retryDelaySeconds => 5,
 		autoRecognition => 0,
 		autoMetadataOverlay => 0,
+		autoStationArtworkLabel => 1,
 		autoClearOverlayOnNoMatch => 0,
 		autoIgnoredStations => '',
 		autoCooldownSeconds => 120,
