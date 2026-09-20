@@ -94,8 +94,9 @@ original radio station; this default-on behavior has its own settings toggle.
 The plugin keeps only one generated JPEG per player,
 overwrites it on the next match, and removes it when the overlay is cleared.
 For an unnamed raw stream, the bar identifies its host instead of displaying
-the full URL. If artwork composition fails, the unmodified Shazam artwork is
-used. Composition failures are logged in the LMS server log and in the latest
+the full URL. The label is rendered with Pillow and does not require FFmpeg's
+optional `drawtext` filter. If artwork composition fails, the unmodified Shazam
+artwork is used. Composition failures are logged in the LMS server log and in the latest
 per-player `var/logs/artwork_PLAYER_ID.log` diagnostic file. A separate
 default-off option restores the station's original metadata
 when every attempt in an automatic sequence returns no match. The next

@@ -100,9 +100,9 @@ overlay metadata left in a live LMS song across a server restart; such residue
 is never accepted as native restoration state. Clearing restores the saved
 native values or removes plugin-owned cache entries before notifying clients.
 
-Automatic overlay artwork is composed by a separate external artwork worker,
-never on the LMS event loop. It downloads the already-selected Shazam cover,
-normalizes it to a square JPEG, and burns a translucent bottom bar containing
+Automatic overlay artwork is composed with Pillow by a separate external
+artwork worker, never on the LMS event loop. It downloads the already-selected
+Shazam cover, normalizes it to a square JPEG, and burns a translucent bottom bar containing
 the original station name into the pixels. Storage is bounded to one
 plugin-local `var/tmp` image per player, atomically replaced on a later match
 and removed when that player's overlay clears. A plugin HTTP handler serves
@@ -117,7 +117,7 @@ artwork.
 
 Station-label composition is independently controlled by the default-on
 `autoStationArtworkLabel` preference. A failed helper falls back to the remote
-cover and records the latest FFmpeg error in both the LMS log and the bounded
+cover and records the latest rendering error in both the LMS log and the bounded
 per-player `var/logs/artwork_PLAYER_ID.log` file.
 
 The atomic destination replacement is also the authoritative completion

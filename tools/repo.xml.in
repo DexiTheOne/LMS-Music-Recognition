@@ -7,7 +7,7 @@
     <plugin name="ShazamCapture" version="@VERSION@" target="unix" minTarget="9.1.0" maxTarget="9.1.*">
       <title lang="EN">Shazam Capture</title>
       <desc lang="EN">Recognize music already being proxied by LMS without interrupting playback.</desc>
-      <changes lang="EN">Adds a station-artwork label toggle and Linux-friendly artwork diagnostics.</changes>
+      <changes lang="EN">Renders station artwork labels without requiring FFmpeg drawtext support.</changes>
       <creator>DexiTheOne</creator>
       <category>information</category>
       <link>https://github.com/DexiTheOne/LMS-Music-Recognition</link>

@@ -1,5 +1,13 @@
 # Changelog and failure history
 
+## 2026-09-20 — Portable station artwork renderer (0.3.2)
+
+- Replaced FFmpeg `drawtext` station-label rendering with Pillow so Linux
+  `imageio-ffmpeg` builds without the optional filter can still generate the
+  labeled artwork.
+- Added Pillow to the plugin-managed Python dependencies while retaining
+  FFmpeg for recognition audio decoding.
+
 ## 2026-09-20 — Station artwork controls and diagnostics (0.3.1)
 
 - Added a default-on setting to show or hide the radio-station label on

@@ -90,48 +90,60 @@ def clean_spotify_url(url):
         return None
     return urlunsplit(("https", "open.spotify.com", parts.path, "", ""))
 
-def compose_station_artwork(source, station, output, ffmpeg, timeout):
+def compose_station_artwork(source, station, output, _ffmpeg, _timeout):
     if not source or not station or not output or not inside(output):
         return False
     tmp_dir = os.path.join(PLUGIN_ROOT, "var", "tmp")
-    text_fd, text_path = tempfile.mkstemp(prefix="artwork_text_", suffix=".txt", dir=tmp_dir)
     output_fd, staged = tempfile.mkstemp(prefix="artwork_staged_", suffix=".jpg", dir=tmp_dir)
     os.close(output_fd)
     try:
+        from PIL import Image, ImageDraw, ImageFont, ImageOps
+
         label = " ".join(str(station).split())[:80]
-        with os.fdopen(text_fd, "w", encoding="utf-8") as text:
-            text.write(label)
         font_size = max(32, min(66, int(1800 / max(len(label), 1))))
-        escaped_text_path = text_path.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
-        vf = (
-            "scale=1200:1200:force_original_aspect_ratio=decrease,"
-            "pad=1200:1200:(ow-iw)/2:(oh-ih)/2:black,"
-            "drawbox=x=0:y=ih*0.84:w=iw:h=ih*0.16:color=black@0.72:t=fill,"
-            f"drawtext=textfile='{escaped_text_path}':fontcolor=white:"
-            f"fontsize={font_size}:x=(w-text_w)/2:y=h*0.92-text_h/2"
+        font = None
+        for candidate in (
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+            "/System/Library/Fonts/Supplemental/Arial.ttf",
+        ):
+            if os.path.isfile(candidate):
+                font = ImageFont.truetype(candidate, font_size)
+                break
+        if font is None:
+            font = ImageFont.load_default(size=font_size)
+
+        with Image.open(source) as original:
+            image = ImageOps.pad(
+                original.convert("RGB"),
+                (1200, 1200),
+                method=Image.Resampling.LANCZOS,
+                color="black",
+            )
+        draw = ImageDraw.Draw(image, "RGBA")
+        draw.rectangle((0, 1008, 1200, 1200), fill=(0, 0, 0, 184))
+        bounds = draw.textbbox((0, 0), label, font=font)
+        text_width = bounds[2] - bounds[0]
+        text_height = bounds[3] - bounds[1]
+        draw.text(
+            ((1200 - text_width) / 2, 1104 - text_height / 2 - bounds[1]),
+            label,
+            font=font,
+            fill="white",
         )
-        proc = subprocess.run(
-            [ffmpeg, "-hide_banner", "-loglevel", "error", "-i", source,
-             "-vf", vf, "-frames:v", "1", "-q:v", "3", "-y", staged],
-            capture_output=True, timeout=min(timeout, 8), check=False
-        )
-        if proc.returncode or not os.path.getsize(staged):
-            detail = proc.stderr.decode("utf-8", "replace").strip()
-            if detail:
-                print(f"FFmpeg station artwork error: {detail[-2000:]}", file=sys.stderr)
-            else:
-                print(
-                    f"FFmpeg station artwork failed with exit code {proc.returncode}",
-                    file=sys.stderr,
-                )
+        image.save(staged, format="JPEG", quality=92, optimize=True)
+        if not os.path.getsize(staged):
             return False
         os.replace(staged, output)
         return True
     except Exception as exc:
-        print(f"Unable to compose station artwork: {type(exc).__name__}", file=sys.stderr)
+        print(
+            f"Unable to compose station artwork: {type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
         return False
     finally:
-        for path in (text_path, staged):
+        for path in (staged,):
             try:
                 os.unlink(path)
             except OSError:
