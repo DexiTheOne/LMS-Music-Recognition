@@ -1,6 +1,6 @@
 # Changelog and failure history
 
-## 2026-09-20 — Restore protocol-handler station artwork
+## 2026-09-20 — Restore protocol-handler station artwork (0.3.3)
 
 - Preserve native station artwork exposed by the live song or protocol handler
   before publishing an automatic recognition overlay. Linux HLS handlers can
