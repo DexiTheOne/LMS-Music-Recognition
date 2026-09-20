@@ -250,10 +250,12 @@ sub _publish_overlay {
 		$state->{url}, eval { $song->track->url }, eval { $song->currentTrack->url }
 	);
 	if (!$overlay{$id}) {
+		my $native_artwork = _native_artwork($song, $old, @urls);
 		my %old_images = map {
 			my $key = "remote_image_$_";
 			my $old_image = $cache->get($key);
-			$key => (_plugin_owned_artwork($old_image) ? undef : $old_image)
+			$old_image = undef if _plugin_owned_artwork($old_image);
+			$key => (defined $old_image ? $old_image : $native_artwork)
 		} @urls;
 		$overlay{$id} = {
 			song => $song, old => $old, station => $station,
@@ -389,6 +391,23 @@ sub _plugin_owned_artwork {
 	return 1 if $url =~ m{/plugins/ShazamCapture/artwork/}i;
 	return 1 if $url =~ m{%2fplugins%2fShazamCapture%2fartwork%2f}i;
 	return 0;
+}
+
+sub _native_artwork {
+	my ($song, $meta, @urls) = @_;
+	my @candidates = (
+		ref $meta eq 'HASH' ? $meta->{cover} : undef,
+		eval { $song->pluginData('httpCover') },
+		(map { $cache->get("remote_image_$_") } @urls),
+		eval { $song->icon },
+	);
+	for my $artwork (@candidates) {
+		next unless defined $artwork && length $artwork;
+		next if _plugin_owned_artwork($artwork);
+		next if $artwork =~ m{(?:^|/)html/images/(?:cover|radio)\.(?:png|jpe?g)\z}i;
+		return $artwork;
+	}
+	return undef;
 }
 
 sub _same_track_meta {

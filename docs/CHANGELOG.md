@@ -1,5 +1,15 @@
 # Changelog and failure history
 
+## 2026-09-20 — Restore protocol-handler station artwork
+
+- Preserve native station artwork exposed by the live song or protocol handler
+  before publishing an automatic recognition overlay. Linux HLS handlers can
+  provide the station picture without populating the exact `remote_image_*`
+  cache key used by the plugin, which previously left only LMS's generic cover
+  after an automatic no-match.
+- Restore that native image across the stream's URL aliases while rejecting
+  plugin-owned and generic LMS fallback artwork.
+
 ## 2026-09-20 — Suppress unchanged automatic overlays
 
 - Reused the active automatic overlay when a successive successful capture

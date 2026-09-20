@@ -26,7 +26,9 @@ BEGIN {
 	$INC{'Slim/Utils/Prefs.pm'} = __FILE__;
 
 	package Slim::Utils::Cache;
-	sub new { return bless {}, shift }
+	sub new { return bless { values => {} }, shift }
+	sub get { return $_[0]->{values}->{$_[1]} }
+	sub set { $_[0]->{values}->{$_[1]} = $_[2] }
 	$INC{'Slim/Utils/Cache.pm'} = __FILE__;
 
 	package Slim::Utils::Timers;
@@ -102,6 +104,34 @@ is(
 		title => 'song', artist => 'the artist', album => ' album ',
 	}),
 	'metadata fallback identity ignores case and whitespace differences',
+);
+
+{
+	package TestSong;
+	sub new {
+		my $class = shift;
+		return bless { @_ }, $class;
+	}
+	sub pluginData { return $_[0]->{$_[1]} }
+	sub icon { return $_[0]->{icon} }
+}
+
+is(
+	Plugins::ShazamCapture::Auto::_native_artwork(
+		TestSong->new(icon => 'https://station.test/logo.png'), undef,
+		'hlsplay://station.test/live'
+	),
+	'https://station.test/logo.png',
+	'protocol-handler station artwork is retained when no remote-image cache entry exists',
+);
+is(
+	Plugins::ShazamCapture::Auto::_native_artwork(
+		TestSong->new(icon => 'html/images/radio.png'),
+		{ cover => '/imageproxy/http%3A%2F%2Fserver%2Fplugins%2FShazamCapture%2Fartwork%2Fplayer.jpg/image.jpg' },
+		'hlsplay://station.test/live'
+	),
+	undef,
+	'plugin artwork and generic LMS fallback images are not saved as native station artwork',
 );
 
 done_testing();
