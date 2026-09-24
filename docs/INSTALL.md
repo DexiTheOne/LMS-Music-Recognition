@@ -16,6 +16,10 @@ versioned ZIP to the corresponding GitHub release. Add this URL under
 
 Select **Shazam Capture**, apply the change, and allow LMS to restart.
 
+For upgrades and known cache pitfalls, use
+[`UPGRADE-TROUBLESHOOTING.md`](UPGRADE-TROUBLESHOOTING.md). Back up recognition
+history outside the installed-plugin directory before upgrading.
+
 ## Official LMS Docker image
 
 The plugin archive is portable source and intentionally does not contain the

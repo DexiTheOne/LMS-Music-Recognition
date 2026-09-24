@@ -8,6 +8,9 @@
 - This restores the readable label and description for **Show the radio station
   name on recognized artwork** on the global settings page. All settings
   continue using native LMS controls and layout.
+- On the running Docker server, clearing the generated `stringcache.*.bin`
+  and restarting confirmed that the label rendered normally. See
+  `UPGRADE-TROUBLESHOOTING.md` for the guarded command and upgrade checks.
 
 ## 2026-09-24 — Refresh settings templates across upgrades (0.3.7)
 
