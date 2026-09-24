@@ -31,21 +31,40 @@ The official `lmscommunity/lyrionmusicserver` image supports a persistent
    plugin has not been installed yet.
 4. Add the repository URL in LMS and install **Shazam Capture**.
 5. After LMS has restarted to install the plugin, restart the container once.
-   The init script creates `python/venv`, installs the pinned dependency ranges,
+   The init script creates `/config/cache/ShazamCapture-venv`, installs the pinned dependency ranges,
    and obtains the matching `imageio-ffmpeg` binary for the container CPU.
 6. In LMS, run `<playerid> shazamcapture status` through the CLI and confirm
    both `python_ready` and `ffmpeg_ready` are `1`.
 
-The virtual environment lives below `/config/cache`, so it persists with the
-normal LMS configuration volume. The script also installs Fontconfig and a
+The virtual environment lives below `/config/cache`, outside
+`InstalledPlugins/Plugins/ShazamCapture`, so LMS can replace the plugin during
+upgrades. The script also installs Fontconfig and a
 DejaVu font for FFmpeg's station-name artwork label. It checks dependencies on
 later starts, which also repairs the environment after an LMS plugin upgrade
 replaces the installed directory.
 
+### Upgrade from a plugin-local virtual environment
+
+Replace the existing `/config/custom-init.sh` with the current
+`docker/custom-init.sh` and restart the container **before** requesting the
+next plugin upgrade. The updated script builds and checks the external
+environment, then removes only the old generated
+`InstalledPlugins/Plugins/ShazamCapture/python/venv` directory. LMS can then
+replace its plugin directory normally. This one-time cleanup does not touch
+recognition history, backups, audio dumps, or plugin preferences. Confirm
+`python_source:cache` and `ffmpeg_source:cache` in `shazamcapture status`.
+
+If an earlier upgrade left a mixed installation, reinstall the new release
+after that restart and check that the settings page includes **Show the radio
+station name on recognized artwork**. If the init script cannot remove the
+legacy environment, resolve its file ownership before retrying the upgrade.
+
 If the container does not run as root during `custom-init.sh`, bake `python3`,
 `python3-venv`, CA certificates, Fontconfig, and at least one usable font into a
 derived image instead. Then create the virtual environment from
-`python/requirements.txt` in the installed plugin directory. Do not copy the
+`python/requirements.txt` outside the installed plugin directory and set
+`SHAZAMCAPTURE_PYTHON` to its absolute interpreter path in the LMS service
+environment. Do not copy the
 macOS development environment to Linux.
 
 ## Release procedure

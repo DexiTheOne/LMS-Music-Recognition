@@ -1,5 +1,21 @@
 # Changelog and failure history
 
+## 2026-09-23 — Keep Docker dependencies outside the plugin (0.3.6)
+
+- Moved the Docker-managed Python virtual environment to
+  `/config/cache/ShazamCapture-venv`, outside LMS's
+  `InstalledPlugins/Plugins/ShazamCapture` extraction target. The runtime
+  derives that location from the LMS plugin path, while local development
+  continues to use `python/venv` and explicit executable overrides still work.
+- After the replacement environment passes `pip check`, the updated Docker
+  init script removes the old generated `python/venv`. This clears the files
+  that prevented Plugin Downloader from removing the old plugin during the
+  0.3.5 upgrade. Recognition databases and other runtime evidence are left
+  alone.
+- The 0.3.5 release archive already included the artwork-label setting. The
+  live server's settings page instead had the exact control set from 0.3.0,
+  consistent with an incomplete replacement after the removal errors.
+
 ## 2026-09-23 — Restore the saved station image URL (0.3.5)
 
 - Resolved the original station image directly from LMS's in-memory Favorites

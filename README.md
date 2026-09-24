@@ -173,15 +173,19 @@ view independently of every other player.
 
 ## Dependencies
 
-Linux and macOS are supported. Dependencies are installed in the plugin-local
-environment; do not copy `python/venv` between operating systems or CPU
+Linux and macOS are supported. Local development uses a plugin-local
+environment; the supplied Docker init script installs its environment in
+`/config/cache/ShazamCapture-venv`, outside LMS's replaceable plugin directory.
+Do not copy a virtual environment between operating systems or CPU
 architectures. The `imageio-ffmpeg` package supplies a plugin-local FFmpeg
 binary.
 
     python3.12 -m venv "python/venv"
     "python/venv/bin/pip" install -r "python/requirements.txt"
 
-The worker uses `python/venv/bin/python` by default. The LMS service environment
+The worker uses the external Docker environment when installed under LMS's
+`InstalledPlugins/Plugins/ShazamCapture` path, and otherwise uses
+`python/venv/bin/python`. The LMS service environment
 may set `SHAZAMCAPTURE_PYTHON` or `SHAZAMCAPTURE_FFMPEG` to an absolute
 executable path when a site needs an explicit override. An invalid explicit
 override fails closed and is reported by `shazamcapture status`; it never falls

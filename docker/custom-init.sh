@@ -8,7 +8,8 @@ apt-get install --no-install-recommends -qy \
 
 plugin_root=/config/cache/InstalledPlugins/Plugins/ShazamCapture
 requirements="$plugin_root/python/requirements.txt"
-venv="$plugin_root/python/venv"
+venv=/config/cache/ShazamCapture-venv
+legacy_venv="$plugin_root/python/venv"
 
 if [ ! -f "$requirements" ]; then
 	printf '%s\n' 'Shazam Capture is not installed yet; dependency setup will run on the next container start.'
@@ -21,3 +22,13 @@ fi
 
 "$venv/bin/python" -m pip install --disable-pip-version-check --upgrade -r "$requirements"
 "$venv/bin/python" -m pip check
+
+# The old location blocks LMS from replacing the plugin during upgrades.
+# Remove only this generated environment after its replacement is ready.
+if [ -L "$legacy_venv" ]; then
+	printf '%s\n' "Refusing to remove a symbolic-link legacy environment: $legacy_venv" >&2
+	exit 1
+fi
+if [ -d "$legacy_venv" ]; then
+	rm -rf -- "$legacy_venv"
+fi
