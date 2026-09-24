@@ -1,5 +1,17 @@
 # Changelog and failure history
 
+## 2026-09-24 — Refresh settings templates across upgrades (0.3.7)
+
+- Packaged version-specific copies of both settings pages and registered those
+  paths when installed by LMS. This avoids LMS reusing compiled templates from
+  older plugin versions. The project's unversioned templates remain the source
+  for development and packaging.
+- The release builder's deterministic year-2000 file timestamps caused LMS's
+  persistent Template Toolkit cache to consider an older compiled settings page
+  newer than the newly extracted file. This explained why the running 0.3.6
+  code found the external Python environment while its settings page still
+  had precisely the controls from 0.3.0.
+
 ## 2026-09-23 — Keep Docker dependencies outside the plugin (0.3.6)
 
 - Moved the Docker-managed Python virtual environment to

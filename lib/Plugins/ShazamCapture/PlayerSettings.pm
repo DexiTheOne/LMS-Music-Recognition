@@ -27,9 +27,7 @@ sub needsClient {
 }
 
 sub page {
-	return Slim::Web::HTTP::CSRF->protectURI(
-		'plugins/ShazamCapture/settings/player.html'
-	);
+	return Plugins::ShazamCapture::Settings::template_page('player');
 }
 
 sub prefs {

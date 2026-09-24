@@ -2,6 +2,7 @@ package Plugins::ShazamCapture::Settings;
 
 use strict;
 use base qw(Slim::Web::Settings);
+use File::Spec;
 use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(string);
 use Plugins::ShazamCapture::History;
@@ -13,8 +14,23 @@ sub name {
 }
 
 sub page {
+	return template_page('basic');
+}
+
+sub template_page {
+	my ($stem) = @_;
+	my $version = Plugins::ShazamCapture::Plugin->_pluginDataFor('version') || '';
+	my $base = Plugins::ShazamCapture::Plugin->_pluginDataFor('basedir') || '';
+	if ($version =~ /^\d+(?:\.\d+)*$/ && $base) {
+		my $name = "$stem-v$version.html";
+		my $path = File::Spec->catfile($base, 'HTML', 'EN',
+			'plugins', 'ShazamCapture', 'settings', $name);
+		return Slim::Web::HTTP::CSRF->protectURI(
+			"plugins/ShazamCapture/settings/$name"
+		) if -f $path;
+	}
 	return Slim::Web::HTTP::CSRF->protectURI(
-		'plugins/ShazamCapture/settings/basic.html'
+		"plugins/ShazamCapture/settings/$stem.html"
 	);
 }
 

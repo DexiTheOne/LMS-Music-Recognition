@@ -7,7 +7,7 @@
     <plugin name="ShazamCapture" version="@VERSION@" target="unix" minTarget="9.1.0" maxTarget="9.1.*">
       <title lang="EN">Shazam Capture</title>
       <desc lang="EN">Recognize music already being proxied by LMS without interrupting playback.</desc>
-      <changes lang="EN">Moves the Docker Python environment outside the plugin install directory so LMS upgrades can replace every plugin file cleanly.</changes>
+      <changes lang="EN">Refreshes settings pages after upgrades by giving each release unique template paths.</changes>
       <creator>DexiTheOne</creator>
       <category>information</category>
       <link>https://github.com/DexiTheOne/LMS-Music-Recognition</link>

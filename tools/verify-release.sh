@@ -26,6 +26,11 @@ test "$repo_version" = "$version"
 test "$repo_sha" = "$archive_sha"
 
 zipinfo -1 "$archive" | grep -qx 'install.xml'
+for page in basic player; do
+	zipinfo -1 "$archive" | grep -qx "HTML/EN/plugins/ShazamCapture/settings/$page-v$version.html"
+	unzip -p "$archive" "HTML/EN/plugins/ShazamCapture/settings/$page-v$version.html" |
+		cmp - "HTML/EN/plugins/ShazamCapture/settings/$page.html"
+done
 if zipinfo -1 "$archive" | grep -Eq '(^|/)venv/|(^|/)var/|(^|/)\.git'; then
 	printf '%s\n' 'Release contains excluded development or runtime state' >&2
 	exit 1

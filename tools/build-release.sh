@@ -21,6 +21,10 @@ rm -f "$archive_path"
 
 cp install.xml strings.txt README.md "$stage/"
 cp -R HTML lib python "$stage/"
+for page in basic player; do
+	cp "$stage/HTML/EN/plugins/ShazamCapture/settings/$page.html" \
+		"$stage/HTML/EN/plugins/ShazamCapture/settings/$page-v$version.html"
+done
 rm -rf "$stage/python/venv"
 find "$stage" -name __pycache__ -type d -prune -exec rm -rf {} +
 find "$stage" \( -name '*.pyc' -o -name '.DS_Store' \) -type f -delete
