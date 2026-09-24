@@ -5,10 +5,12 @@ use Slim::Control::Request;
 use Slim::Music::Info;
 use Slim::Player::Client;
 use Slim::Utils::Cache;
+use Slim::Utils::Favorites;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Slim::Utils::Timers;
 use Time::HiRes qw(time);
+use URI::Escape qw(uri_unescape);
 use Plugins::ShazamCapture::Artwork;
 
 my $log = logger('plugin.shazamcapture');
@@ -247,10 +249,19 @@ sub _publish_overlay {
 	my (undef, $station) = _source($client);
 	$station = _station_label($station);
 	my @urls = grep { defined $_ && length $_ } (
-		$state->{url}, eval { $song->track->url }, eval { $song->currentTrack->url }
+		$state->{url}, eval { $song->track->url },
+		eval { $song->currentTrack->url }, eval { $song->streamUrl }
 	);
 	if (!$overlay{$id}) {
-		my $native_artwork = _native_artwork($song, $old, @urls);
+		my @native_songs = grep { $_ } (
+			$song, eval { $client->streamingSong },
+			eval { $client->currentSongForUrl($state->{url}) },
+		);
+		my $native_artwork = _favorite_artwork($client, @urls);
+		for my $native_song (@native_songs) {
+			last if $native_artwork;
+			$native_artwork = _native_artwork($native_song, $old, @urls);
+		}
 		my %old_images = map {
 			my $key = "remote_image_$_";
 			my $old_image = $cache->get($key);
@@ -259,6 +270,7 @@ sub _publish_overlay {
 		} @urls;
 		$overlay{$id} = {
 			song => $song, old => $old, station => $station,
+			native_artwork => $native_artwork,
 			old_images => \%old_images,
 		};
 	}
@@ -334,14 +346,35 @@ sub clear_overlay {
 		$saved && $saved->{song},
 		eval { $client->playingSong },
 		eval { $client->streamingSong },
+		eval { $client->currentSongForUrl($client->playingSong->track->url) },
 		eval { $client->controller->songStreamController->song },
 	);
 	my (%seen, %live_urls);
 	my $cleared;
+	my $native_artwork = $saved && $saved->{native_artwork};
+	$native_artwork ||= _favorite_artwork($client,
+		grep { defined $_ && length $_ } (
+			eval { $client->playingSong->streamUrl },
+			eval { $client->streamingSong->streamUrl },
+			eval { $client->playingSong->track->url },
+		)
+	);
+	if (!$native_artwork) {
+		for my $song (@songs) {
+			$native_artwork = _native_artwork($song, undef,
+				grep { defined $_ && length $_ } (
+					eval { $song->track->url },
+					eval { $song->currentTrack->url },
+					eval { $song->streamUrl }
+				)
+			);
+			last if $native_artwork;
+		}
+	}
 	for my $song (@songs) {
 		my $key = "$song";
 		next if $seen{$key}++;
-		for my $url (eval { $song->track->url }, eval { $song->currentTrack->url }) {
+		for my $url (eval { $song->track->url }, eval { $song->currentTrack->url }, eval { $song->streamUrl }) {
 			$live_urls{$url} = 1 if defined $url && length $url;
 		}
 		my $current = eval { $song->pluginData('wmaMeta') };
@@ -352,19 +385,30 @@ sub clear_overlay {
 			(undef, $station) = _source($client);
 			$station = _station_label($station);
 		}
-		$restore = { title => $station } if !$restore && $station;
+		$restore = _restored_meta($restore, $station, $native_artwork);
 		eval { $song->pluginData(wmaMeta => $restore) };
 		$cleared = 1;
 	}
 	return unless $saved || $cleared;
 	for my $key (keys %{$saved && $saved->{old_images} || {}}) {
-		my $old = $saved->{old_images}->{$key};
+		my $old = $native_artwork || $saved->{old_images}->{$key};
 		defined $old
 			? $cache->set($key, $old, 86400)
 			: $cache->remove($key);
 	}
+	if ($saved && $native_artwork) {
+		for my $url (keys %live_urls) {
+			my $key = "remote_image_$url";
+			next if exists $saved->{old_images}->{$key};
+			$cache->set($key, $native_artwork, 86400);
+		}
+	}
 	if (!$saved) {
-		$cache->remove("remote_image_$_") for keys %live_urls;
+		for my $url (keys %live_urls) {
+			$native_artwork
+				? $cache->set("remote_image_$url", $native_artwork, 86400)
+				: $cache->remove("remote_image_$url");
+		}
 	}
 	$client->metaTitle('');
 	$publishing_until{$id} = time() + 2;
@@ -375,7 +419,9 @@ sub clear_overlay {
 	]);
 	$client->update();
 	$log->info("automatic metadata overlay cleared for $id: "
-		. ($reason || 'overlay cleared'));
+		. ($reason || 'overlay cleared')
+		. ($native_artwork ? ' (original station artwork URL restored)'
+			: ' (no original station artwork URL available)'));
 }
 
 sub _plugin_owned_meta {
@@ -411,6 +457,44 @@ sub _native_artwork {
 		return $artwork;
 	}
 	return undef;
+}
+
+sub _favorite_artwork {
+	my ($client, @urls) = @_;
+	my $favorites = eval { Slim::Utils::Favorites->new($client) } or return undef;
+	for my $url (@urls) {
+		next unless defined $url && length $url;
+		my @lookup = ($url);
+		if ($url =~ m{^hlsplays?://}i) {
+			my $original = $url;
+			$original =~ s/\|\z//;
+			$original =~ s{^hlsplays://}{https://}i;
+			$original =~ s{^hlsplay://}{http://}i;
+			push @lookup, $original;
+		}
+		for my $candidate (@lookup) {
+			my $index = eval { $favorites->findUrl($candidate) };
+			next unless defined $index;
+			my $entry = eval { $favorites->entry($index) };
+			next unless ref $entry eq 'HASH';
+			my $artwork = $entry->{icon} || $entry->{image} || '';
+			if ($artwork =~ m{^/imageproxy/([^/]+)/image(?:_[^/]*)?\.(?:png|jpe?g|webp)$}i) {
+				$artwork = uri_unescape($1);
+			}
+			next unless $artwork =~ m{^https?://}i;
+			next if _plugin_owned_artwork($artwork);
+			return $artwork;
+		}
+	}
+	return undef;
+}
+
+sub _restored_meta {
+	my ($old, $station, $artwork) = @_;
+	my $restore = ref $old eq 'HASH' ? { %$old } : {};
+	$restore->{title} = $station if !$restore->{title} && $station;
+	$restore->{cover} = $artwork if $artwork;
+	return keys %$restore ? $restore : undef;
 }
 
 sub _same_track_meta {

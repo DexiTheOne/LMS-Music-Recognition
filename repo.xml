@@ -4,16 +4,16 @@
     <title lang="EN">DexiTheOne LMS Plugins</title>
   </details>
   <plugins>
-    <plugin name="ShazamCapture" version="0.3.4" target="unix" minTarget="9.1.0" maxTarget="9.1.*">
+    <plugin name="ShazamCapture" version="0.3.5" target="unix" minTarget="9.1.0" maxTarget="9.1.*">
       <title lang="EN">Shazam Capture</title>
       <desc lang="EN">Recognize music already being proxied by LMS without interrupting playback.</desc>
-      <changes lang="EN">Restores PlayHLS station artwork after an automatic no-match.</changes>
+      <changes lang="EN">Restores the original station image URL from LMS Favorites after an automatic no-match.</changes>
       <creator>DexiTheOne</creator>
       <category>information</category>
       <link>https://github.com/DexiTheOne/LMS-Music-Recognition</link>
       <icon>https://raw.githubusercontent.com/DexiTheOne/LMS-Music-Recognition/main/HTML/EN/plugins/ShazamCapture/html/images/shazamcapture.png</icon>
-      <url>https://github.com/DexiTheOne/LMS-Music-Recognition/releases/download/v0.3.4/ShazamCapture-0.3.4.zip</url>
-      <sha>6fbbd57a8c9cda107c121264b3522307da3042d5</sha>
+      <url>https://github.com/DexiTheOne/LMS-Music-Recognition/releases/download/v0.3.5/ShazamCapture-0.3.5.zip</url>
+      <sha>d041ea494ee6e1f23a5703a880ad3afb9b6469df</sha>
     </plugin>
   </plugins>
 </extensions>

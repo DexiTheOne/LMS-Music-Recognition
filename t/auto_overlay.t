@@ -31,6 +31,22 @@ BEGIN {
 	sub set { $_[0]->{values}->{$_[1]} = $_[2] }
 	$INC{'Slim/Utils/Cache.pm'} = __FILE__;
 
+	package TestFavorites;
+	sub findUrl {
+		return '3.10' if $_[1] eq 'http://station.test/live.m3u8';
+		return '3.11' if $_[1] eq 'https://station.test/plain-stream';
+		return undef;
+	}
+	sub entry {
+		return {
+			icon => '/imageproxy/https%3A%2F%2Fstation.test%2Foriginal.jpg%3Fsize%3D400/image.jpg'
+		};
+	}
+
+	package Slim::Utils::Favorites;
+	sub new { return bless {}, 'TestFavorites' }
+	$INC{'Slim/Utils/Favorites.pm'} = __FILE__;
+
 	package Slim::Utils::Timers;
 	$INC{'Slim/Utils/Timers.pm'} = __FILE__;
 
@@ -144,6 +160,32 @@ is(
 	),
 	undef,
 	'plugin artwork and generic LMS fallback images are not saved as native station artwork',
+);
+
+is(
+	Plugins::ShazamCapture::Auto::_favorite_artwork(
+		undef, 'hlsplay://station.test/live.m3u8|'
+	),
+	'https://station.test/original.jpg?size=400',
+	'the saved station image URL is recovered directly from the HLS favorite',
+);
+is(
+	Plugins::ShazamCapture::Auto::_favorite_artwork(
+		undef, 'https://station.test/plain-stream'
+	),
+	'https://station.test/original.jpg?size=400',
+	'a regular favorite uses the same original-image lookup',
+);
+
+is_deeply(
+	Plugins::ShazamCapture::Auto::_restored_meta(
+		undef, 'Station FM', 'https://station.test/original.jpg?size=400'
+	),
+	{
+		title => 'Station FM',
+		cover => 'https://station.test/original.jpg?size=400',
+	},
+	'no-match restoration publishes the untouched original image URL with the station title',
 );
 
 done_testing();

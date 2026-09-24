@@ -1,5 +1,17 @@
 # Changelog and failure history
 
+## 2026-09-23 — Restore the saved station image URL (0.3.5)
+
+- Resolved the original station image directly from LMS's in-memory Favorites
+  entry when PlayHLS no longer exposes it in song metadata. The active Linux
+  station's favorite contains a direct image URL, while its no-match status
+  lacked any artwork URL after version 0.3.4 cleared the overlay.
+- Publish that unchanged image URL in restored `wmaMeta` and cache entries for
+  the live stream, so LMS status and control UIs can display it immediately.
+  The station image is neither downloaded nor modified by the fallback path.
+- Log whether clearing found an original image URL, without logging its query
+  parameters.
+
 ## 2026-09-20 — Restore PlayHLS station artwork (0.3.4)
 
 - Read PlayHLS 2.12's preserved `hls_coverurl` song field directly before

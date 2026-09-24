@@ -15,6 +15,9 @@ original station picture must return instead of LMS's generic radio cover.
 For PlayHLS 2.12, confirm restoration uses its preserved `hls_coverurl` even
 when `wmaMeta`, `song->icon`, and the current stream cache still resolve to a
 plugin-owned overlay from before a server restart or plugin update.
+When the original image exists only in an LMS Favorite for the HLS station,
+confirm the exact source URL appears as the restored cover after no-match.
+The fallback must not label, download, or re-encode that image.
 Confirm the status response contains the station title after removal rather
 than falling back to the last recognized song title.
 
