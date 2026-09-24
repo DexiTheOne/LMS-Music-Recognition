@@ -51,8 +51,11 @@ next plugin upgrade. The updated script builds and checks the external
 environment, then removes only the old generated
 `InstalledPlugins/Plugins/ShazamCapture/python/venv` directory. LMS can then
 replace its plugin directory normally. This one-time cleanup does not touch
-recognition history, backups, audio dumps, or plugin preferences. Confirm
-`python_source:cache` and `ffmpeg_source:cache` in `shazamcapture status`.
+recognition history, backups, audio dumps, or plugin preferences. The old
+plugin code cannot discover the new environment, so recognition may be
+temporarily unavailable between this restart and the 0.3.6 upgrade; playback
+is unaffected. Upgrade promptly, then confirm `python_source:cache` and
+`ffmpeg_source:cache` in `shazamcapture status`.
 
 If an earlier upgrade left a mixed installation, reinstall the new release
 after that restart and check that the settings page includes **Show the radio
