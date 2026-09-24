@@ -5,7 +5,7 @@
   <description>PLUGIN_SHAZAMCAPTURE_DESC</description>
   <creator>DexiTheOne</creator>
   <icon>plugins/ShazamCapture/html/images/shazamcapture.png</icon>
-  <version>0.3.7</version>
+  <version>0.3.8</version>
   <defaultState>enabled</defaultState>
   <type>2</type>
   <targetApplication>

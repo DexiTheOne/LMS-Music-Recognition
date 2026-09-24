@@ -25,6 +25,21 @@ archive_sha=$(shasum -a 1 "$archive" | awk '{print $1}')
 test "$repo_version" = "$version"
 test "$repo_sha" = "$archive_sha"
 
+python3 - "$archive" "$version" <<'PY'
+import datetime
+import sys
+import zipfile
+
+parts = [int(part) for part in sys.argv[2].split('.')]
+base = int(datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc).timestamp())
+stamp = base + parts[0] * 1_000_000_000 + parts[1] * 1_000_000 + parts[2] * 1000
+expected = datetime.datetime.fromtimestamp(stamp).timetuple()[:6]
+with zipfile.ZipFile(sys.argv[1]) as archive:
+    actual = archive.getinfo('strings.txt').date_time
+if actual != expected:
+    raise SystemExit(f'Incorrect strings.txt release timestamp: {actual} != {expected}')
+PY
+
 zipinfo -1 "$archive" | grep -qx 'install.xml'
 for page in basic player; do
 	zipinfo -1 "$archive" | grep -qx "HTML/EN/plugins/ShazamCapture/settings/$page-v$version.html"

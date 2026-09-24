@@ -1,5 +1,14 @@
 # Changelog and failure history
 
+## 2026-09-24 — Refresh translated settings text (0.3.8)
+
+- Gave packaged `strings.txt` a deterministic version-specific timestamp.
+  LMS validates its parsed string cache with source-file modification times;
+  the former fixed year-2000 timestamp let a pre-label cache survive upgrades.
+- This restores the readable label and description for **Show the radio station
+  name on recognized artwork** on the global settings page. All settings
+  continue using native LMS controls and layout.
+
 ## 2026-09-24 — Refresh settings templates across upgrades (0.3.7)
 
 - Packaged version-specific copies of both settings pages and registered those

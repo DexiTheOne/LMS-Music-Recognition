@@ -30,6 +30,22 @@ find "$stage" -name __pycache__ -type d -prune -exec rm -rf {} +
 find "$stage" \( -name '*.pyc' -o -name '.DS_Store' \) -type f -delete
 find "$stage" -exec touch -t 200001010000 {} +
 
+# LMS validates its parsed string cache using source-file mtimes. A fixed
+# archive timestamp lets old translations survive a plugin upgrade, so give
+# strings.txt a reproducible timestamp that changes with the release version.
+python3 - "$stage/strings.txt" "$version" <<'PY'
+import datetime
+import os
+import sys
+
+parts = [int(part) for part in sys.argv[2].split('.')]
+if len(parts) != 3 or any(part < 0 or part >= 1000 for part in parts):
+    raise SystemExit('Expected a three-part numeric plugin version')
+base = int(datetime.datetime(2000, 1, 1, tzinfo=datetime.timezone.utc).timestamp())
+stamp = base + parts[0] * 1_000_000_000 + parts[1] * 1_000_000 + parts[2] * 1000
+os.utime(sys.argv[1], (stamp, stamp))
+PY
+
 (
 	cd "$stage"
 	find . -mindepth 1 -print | LC_ALL=C sort | zip -X -q "$archive_path" -@
