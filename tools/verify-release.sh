@@ -10,6 +10,14 @@ archive="dist/ShazamCapture-$version.zip"
 test -f "$archive"
 xmllint --noout install.xml repo.xml
 
+rg -q '^cat > custom-init\.sh <<' docs/CUSTOM-INIT-PASTE.md
+rg -q '^SHAZAMCAPTURE_INIT_EOF$' docs/CUSTOM-INIT-PASTE.md
+awk '
+	/^cat > custom-init\.sh <</ { copying = 1; next }
+	copying && /^SHAZAMCAPTURE_INIT_EOF$/ { exit }
+	copying { print }
+' docs/CUSTOM-INIT-PASTE.md | cmp - docker/custom-init.sh
+
 repo_version=$(sed -n 's:.*<plugin name="ShazamCapture" version="\([^"]*\)".*:\1:p' repo.xml)
 repo_sha=$(sed -n 's:.*<sha>\([^<]*\)</sha>.*:\1:p' repo.xml)
 archive_sha=$(shasum -a 1 "$archive" | awk '{print $1}')

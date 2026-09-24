@@ -57,6 +57,9 @@ temporarily unavailable between this restart and the 0.3.6 upgrade; playback
 is unaffected. Upgrade promptly, then confirm `python_source:cache` and
 `ffmpeg_source:cache` in `shazamcapture status`.
 
+For a single block to paste while already in `/config`, use
+[`CUSTOM-INIT-PASTE.md`](CUSTOM-INIT-PASTE.md).
+
 If an earlier upgrade left a mixed installation, reinstall the new release
 after that restart and check that the settings page includes **Show the radio
 station name on recognized artwork**. If the init script cannot remove the
